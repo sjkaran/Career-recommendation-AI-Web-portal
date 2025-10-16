@@ -3,29 +3,1319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <title>BPUT AI Career Connect Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 256px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.collapsed .sidebar-header h1 {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: #1e40af;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item span {
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.collapsed .nav-item span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 32px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .notification-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            opacity: 0;
+        }
+
+        .stat-card.gradient-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .stat-card.gradient-green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .stat-card.gradient-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .stat-card.gradient-orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .stat-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stat-info h3 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .stat-icon svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.8;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+        }
+
+        .chart-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            padding: 32px;
+            color: white;
+            margin-bottom: 24px;
+            opacity: 0;
+        }
+
+        .profile-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .profile-info h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .profile-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .profile-completion .percentage {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        .profile-completion .label {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+        }
+
+        .profile-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .opportunities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+
+        .opportunity-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .opportunity-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .opp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .opp-title h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .opp-company {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .match-score .score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .match-score .label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .opp-details {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .opp-salary {
+            color: #3b82f6;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .skill-tag {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .skill-tag.matched {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item .label {
+            color: #6b7280;
+        }
+
+        .stat-item .value {
+            font-weight: 600;
+        }
+
+        .readiness-card {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 1px solid #6ee7b7;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .readiness-card h3 {
+            color: #065f46;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .readiness-score {
+            font-size: 40px;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #6ee7b7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #059669;
+            border-radius: 4px;
+            width: 0;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .students-table {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        td {
+            padding: 12px;
+        }
+
+        .view-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .view-btn:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="coursel">
-        <div class="group">
-            <div class="card">1</div>
-            <div class="card">2</div>
-            <div class="card">3</div>
-            <div class="card">4</div>
-            <div class="card">5</div>
-            <div class="card">6</div>
+    <div class="app-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>BPUT Career AI</h1>
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showView('dashboard')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="showView('profile')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>My Profile</span>
+                </div>
+                <div class="nav-item" onclick="showView('opportunities')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <span>Opportunities</span>
+                </div>
+                <div class="nav-item" onclick="showView('students')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    </svg>
+                    <span>All Students</span>
+                </div>
+            </nav>
         </div>
 
-        <div aria-hidden class="group">
-            <div class="card">1</div>
-            <div class="card">2</div>
-            <div class="card">3</div>
-            <div class="card">4</div>
-            <div class="card">5</div>
-            <div class="card">6</div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <div class="header-title">
+                        <h2 id="headerTitle">University Analytics Dashboard</h2>
+                        <p id="headerSubtitle">Real-time insights into student employability</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="notification-btn">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            </svg>
+                            <span class="notification-badge"></span>
+                        </button>
+                        <div class="user-avatar">S</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard View -->
+                <div id="dashboardView" class="view-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card gradient-blue">
+                            <div class="stat-info">
+                                <p>Total Students</p>
+                                <h3>150</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-green">
+                            <div class="stat-info">
+                                <p>Placement Ready</p>
+                                <h3 id="placementReady">87</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="8" r="7"></circle>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-purple">
+                            <div class="stat-info">
+                                <p>Active Opportunities</p>
+                                <h3>50</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-orange">
+                            <div class="stat-info">
+                                <p>Average CGPA</p>
+                                <h3 id="avgCGPA">7.85</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <h3>Year-wise Placement Readiness</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="yearChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Department Distribution</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Top Skills in Demand</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile View -->
+                <div id="profileView" class="view-content">
+                    <div class="profile-header">
+                        <div class="profile-main">
+                            <div class="profile-info">
+                                <h2>Rahul Kumar</h2>
+                                <p class="profile-email">STU0042 • rahul.kumar@bput.ac.in</p>
+                                <div class="profile-badges">
+                                    <span class="profile-badge">CSE</span>
+                                    <span class="profile-badge">Year 3</span>
+                                    <span class="profile-badge">CGPA: 8.45</span>
+                                </div>
+                            </div>
+                            <div class="profile-completion">
+                                <div class="percentage">92%</div>
+                                <div class="label">Profile Complete</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-grid">
+                        <div>
+                            <div class="profile-section">
+                                <h3>AI-Powered Career Recommendations</h3>
+                                <div id="recommendations"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="profile-section">
+                                <h3>Skills Portfolio</h3>
+                                <div class="skills-tags" id="studentSkills"></div>
+                            </div>
+                            <div class="profile-section" style="margin-top: 24px;">
+                                <h3>Achievement Stats</h3>
+                                <div class="stats-list">
+                                    <div class="stat-item">
+                                        <span class="label">Certifications</span>
+                                        <span class="value">4</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="label">Projects</span>
+                                        <span class="value">7</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="label">Hackathons</span>
+                                        <span class="value">3</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="label">Internships</span>
+                                        <span class="value">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="readiness-card" style="margin-top: 24px;">
+                                <h3>Career Readiness Score</h3>
+                                <div class="readiness-score">87%</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="readinessProgress"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opportunities View -->
+                <div id="opportunitiesView" class="view-content">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search opportunities...">
+                        <select class="filter-select">
+                            <option>All Types</option>
+                            <option>Internship</option>
+                            <option>Full-time</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>All Locations</option>
+                            <option>Bangalore</option>
+                            <option>Hyderabad</option>
+                            <option>Remote</option>
+                        </select>
+                    </div>
+                    <div class="opportunities-grid" id="opportunitiesGrid"></div>
+                </div>
+
+                <!-- Students View -->
+                <div id="studentsView" class="view-content">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search students...">
+                        <select class="filter-select">
+                            <option>All Departments</option>
+                            <option>CSE</option>
+                            <option>IT</option>
+                            <option>ECE</option>
+                        </select>
+                    </div>
+                    <div class="students-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Department</th>
+                                    <th>Year</th>
+                                    <th>CGPA</th>
+                                    <th>Profile</th>
+                                    <th>Readiness</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script>
+        // Demo Data Generation
+        const skills = ['Python', 'Java', 'JavaScript', 'React', 'Node.js', 'Machine Learning', 'Data Science', 'Cloud Computing'];
+        const companies = ['TCS', 'Infosys', 'Wipro', 'Cognizant', 'Accenture', 'Amazon', 'Microsoft', 'Google'];
+        const departments = ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'];
+
+        const students = Array.from({ length: 150 }, (_, i) => ({
+            id: `STU${String(i + 1).padStart(4, '0')}`,
+            name: `Student ${i + 1}`,
+            department: departments[Math.floor(Math.random() * departments.length)],
+            year: Math.floor(Math.random() * 4) + 1,
+            cgpa: (6 + Math.random() * 3.5).toFixed(2),
+            profileCompleteness: Math.floor(65 + Math.random() * 35),
+            careerReadiness: Math.floor(60 + Math.random() * 40)
+        }));
+
+        const opportunities = Array.from({ length: 20 }, (_, i) => ({
+            id: `OPP${String(i + 1).padStart(4, '0')}`,
+            title: `${skills[Math.floor(Math.random() * skills.length)]} Developer`,
+            company: companies[Math.floor(Math.random() * companies.length)],
+            type: Math.random() > 0.5 ? 'Internship' : 'Full-time',
+            location: ['Bangalore', 'Hyderabad', 'Remote'][Math.floor(Math.random() * 3)],
+            salary: Math.floor(20000 + Math.random() * 80000),
+            matchScore: Math.floor(70 + Math.random() * 30),
+            skills: skills.sort(() => 0.5 - Math.random()).slice(0, 3)
+        }));
+
+        const studentSkills = ['Python', 'JavaScript', 'React', 'Machine Learning', 'Data Science'];
+
+        // Navigation
+        function showView(viewName) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`${viewName}View`).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+
+            const titles = {
+                dashboard: ['University Analytics Dashboard', 'Real-time insights into student employability'],
+                profile: ['Student Profile & Recommendations', 'AI-powered career matching'],
+                opportunities: ['Career Opportunities', 'Browse verified internships and jobs'],
+                students: ['Student Management', 'Comprehensive student database']
+            };
+
+            document.getElementById('headerTitle').textContent = titles[viewName][0];
+            document.getElementById('headerSubtitle').textContent = titles[viewName][1];
+
+            animateView(viewName);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        // GSAP Animations
+        function animateView(viewName) {
+            if (viewName === 'dashboard') {
+                gsap.fromTo('.stat-card', 
+                    { opacity: 0, y: 30 }, 
+                    { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+                );
+                gsap.fromTo('.chart-card', 
+                    { opacity: 0, y: 40 }, 
+                    { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, delay: 0.4, ease: 'power3.out' }
+                );
+            } else if (viewName === 'profile') {
+                gsap.fromTo('.profile-header', 
+                    { opacity: 0, y: -30 }, 
+                    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }
+                );
+                gsap.fromTo('.profile-section', 
+                    { opacity: 0, x: -30 }, 
+                    { opacity: 1, x: 0, duration: 0.6, stagger: 0.1, delay: 0.3, ease: 'power3.out' }
+                );
+                gsap.fromTo('.readiness-card', 
+                    { opacity: 0, scale: 0.9 }, 
+                    { opacity: 1, scale: 1, duration: 0.6, delay: 0.5, ease: 'back.out(1.7)' }
+                );
+                gsap.to('#readinessProgress', 
+                    { width: '87%', duration: 1.5, delay: 0.8, ease: 'power2.out' }
+                );
+            } else if (viewName === 'opportunities') {
+                gsap.fromTo('.opportunity-card', 
+                    { opacity: 0, y: 30, scale: 0.95 }, 
+                    { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: 'power3.out' }
+                );
+            } else if (viewName === 'students') {
+                gsap.fromTo('.students-table', 
+                    { opacity: 0, y: 30 }, 
+                    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+                );
+            }
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            // Year-wise Chart
+            const yearCtx = document.getElementById('yearChart').getContext('2d');
+            new Chart(yearCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4'],
+                    datasets: [
+                        {
+                            label: 'Total Students',
+                            data: [42, 38, 35, 35],
+                            backgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Placement Ready',
+                            data: [15, 20, 28, 24],
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Department Chart
+            const deptCtx = document.getElementById('deptChart').getContext('2d');
+            new Chart(deptCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: departments,
+                    datasets: [{
+                        data: [35, 28, 25, 22, 20, 20],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Skills Chart
+            const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+            new Chart(skillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: skills,
+                    datasets: [{
+                        label: 'Students',
+                        data: [85, 72, 68, 55, 48, 42, 38, 35],
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Render Opportunities
+        function renderOpportunities() {
+            const grid = document.getElementById('opportunitiesGrid');
+            grid.innerHTML = opportunities.map(opp => `
+                <div class="opportunity-card">
+                    <div class="opp-header">
+                        <div class="opp-title">
+                            <h4>${opp.title}</h4>
+                            <p class="opp-company">${opp.company}</p>
+                        </div>
+                        <div class="match-score">
+                            <div class="score">${opp.matchScore}%</div>
+                            <div class="label">Match</div>
+                        </div>
+                    </div>
+                    <div class="opp-details">
+                        <span>${opp.location}</span>
+                        <span>•</span>
+                        <span class="badge ${opp.type === 'Internship' ? 'badge-blue' : 'badge-green'}">${opp.type}</span>
+                    </div>
+                    <div class="opp-salary">₹${opp.salary.toLocaleString()}/month</div>
+                    <div class="skills-tags">
+                        ${opp.skills.map(skill => `
+                            <span class="skill-tag ${studentSkills.includes(skill) ? 'matched' : ''}">${skill}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Recommendations
+        function renderRecommendations() {
+            const container = document.getElementById('recommendations');
+            const topOpps = opportunities.slice(0, 6);
+            container.innerHTML = topOpps.map(opp => `
+                <div class="opportunity-card" style="margin-bottom: 16px;">
+                    <div class="opp-header">
+                        <div class="opp-title">
+                            <h4>${opp.title}</h4>
+                            <p class="opp-company">${opp.company} • ${opp.location}</p>
+                        </div>
+                        <div class="match-score">
+                            <div class="score">${opp.matchScore}%</div>
+                            <div class="label">Match</div>
+                        </div>
+                    </div>
+                    <div class="opp-details">
+                        <span>₹${opp.salary.toLocaleString()}/month</span>
+                        <span>•</span>
+                        <span>${opp.type}</span>
+                    </div>
+                    <div class="skills-tags">
+                        ${opp.skills.map(skill => `
+                            <span class="skill-tag ${studentSkills.includes(skill) ? 'matched' : ''}">${skill}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Student Skills
+        function renderStudentSkills() {
+            const container = document.getElementById('studentSkills');
+            container.innerHTML = studentSkills.map(skill => `
+                <span class="skill-tag" style="background: #dbeafe; color: #1e40af;">${skill}</span>
+            `).join('');
+        }
+
+        // Render Students Table
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = students.slice(0, 20).map(student => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">${student.name}</div>
+                        <div style="font-size: 12px; color: #6b7280;">${student.id}</div>
+                    </td>
+                    <td><span class="badge badge-blue">${student.department}</span></td>
+                    <td>${student.year}</td>
+                    <td style="font-weight: 600; color: ${student.cgpa >= 8 ? '#10b981' : student.cgpa >= 7 ? '#3b82f6' : '#f59e0b'}">
+                        ${student.cgpa}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 80px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; background: #3b82f6; width: ${student.profileCompleteness}%; border-radius: 4px;"></div>
+                            </div>
+                            <span style="font-size: 12px; color: #6b7280;">${student.profileCompleteness}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${student.careerReadiness >= 80 ? 'badge-green' : 'badge-blue'}">
+                            ${student.careerReadiness}%
+                        </span>
+                    </td>
+                    <td>
+                        <button class="view-btn" onclick="showView('profile')">View Profile</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Counter Animation
+        function animateCounter(element, target) {
+            const obj = { value: 0 };
+            gsap.to(obj, {
+                value: target,
+                duration: 2,
+                ease: 'power2.out',
+                onUpdate: function() {
+                    element.textContent = Math.floor(obj.value);
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Animate stats on load
+            gsap.fromTo('.stat-card', 
+                { opacity: 0, y: 30 }, 
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+            );
+
+            gsap.fromTo('.chart-card', 
+                { opacity: 0, y: 40 }, 
+                { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, delay: 0.4, ease: 'power3.out' }
+            );
+
+            // Animate sidebar
+            gsap.from('.nav-item', {
+                x:0,
+                // opacity: 0,
+                duration: 0.5,
+                stagger: 0.1,
+                ease: 'power3.out'
+            });
+
+            // Initialize charts
+            setTimeout(() => {
+                initCharts();
+            }, 100);
+
+            // Render content
+            renderOpportunities();
+            renderRecommendations();
+            renderStudentSkills();
+            renderStudentsTable();
+
+            // Animate counters
+            const placementEl = document.getElementById('placementReady');
+            const cgpaEl = document.getElementById('avgCGPA');
+            
+            gsap.to({ value: 0 }, {
+                value: 87,
+                duration: 2,
+                delay: 0.5,
+                ease: 'power2.out',
+                onUpdate: function() {
+                    placementEl.textContent = Math.floor(this.targets()[0].value);
+                }
+            });
+
+            gsap.to({ value: 0 }, {
+                value: 7.85,
+                duration: 2,
+                delay: 0.5,
+                ease: 'power2.out',
+                onUpdate: function() {
+                    cgpaEl.textContent = this.targets()[0].value.toFixed(2);
+                }
+            });
+
+            // Hover animations for opportunity cards
+            document.addEventListener('mouseover', (e) => {
+                if (e.target.closest('.opportunity-card')) {
+                    gsap.to(e.target.closest('.opportunity-card'), {
+                        scale: 1.02,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.closest('.opportunity-card')) {
+                    gsap.to(e.target.closest('.opportunity-card'), {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+
+            // Notification bell animation
+            gsap.to('.notification-badge', {
+                scale: 1.2,
+                duration: 0.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+
+            // Logo pulse animation
+            gsap.to('.sidebar-header h1', {
+                scale: 1.05,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+        });
+
+        // Smooth scroll animations
+        const contentArea = document.querySelector('.content-area');
+        contentArea.addEventListener('scroll', () => {
+            const scrollY = contentArea.scrollTop;
+            gsap.to('.header', {
+                boxShadow: scrollY > 10 ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none',
+                duration: 0.3
+            });
+        });
+
+        // Search input focus animation
+        document.querySelectorAll('.search-input').forEach(input => {
+            input.addEventListener('focus', (e) => {
+                gsap.to(e.target, {
+                    scale: 1.02,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+
+            input.addEventListener('blur', (e) => {
+                gsap.to(e.target, {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // Button hover effects
+        document.querySelectorAll('.view-btn, .menu-toggle, .notification-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', (e) => {
+                gsap.to(e.target, {
+                    scale: 1.1,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+
+            btn.addEventListener('mouseleave', (e) => {
+                gsap.to(e.target, {
+                    scale: 1,
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // Nav item click animation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                gsap.fromTo(e.currentTarget, 
+                    { scale: 0.95 },
+                    { scale: 1, duration: 0.3, ease: 'back.out(2)' }
+                );
+            });
+        });
+
+        // Stats card entrance animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    gsap.fromTo(entry.target,
+                        { opacity: 0, y: 30 },
+                        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+                    );
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        setTimeout(() => {
+            document.querySelectorAll('.chart-card, .profile-section').forEach(card => {
+                observer.observe(card);
+            });
+        }, 500);
+
+        // Add floating animation to user avatar
+        gsap.to('.user-avatar', {
+            y: -3,
+            duration: 1.5,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut'
+        });
+
+        // Staggered table row animation
+        setTimeout(() => {
+            gsap.fromTo('#studentsTableBody tr',
+                { opacity: 0, x: -20 },
+                { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+            );
+        }, 100);
+    </script>
 </body>
 </html>
