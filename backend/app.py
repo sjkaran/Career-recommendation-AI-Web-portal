@@ -4,6 +4,10 @@ from config import Config
 from models.user import db
 from utils.demo_data import generate_demo_data
 from datetime import datetime
+from ai_engine.resume_parser import resume_parser
+from utils.demo_data import init_demo_data
+
+
 
 def create_app():
     app = Flask(__name__)
@@ -75,3 +79,20 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+app.cli.command('generate-demo-data')
+def generate_demo_data():
+    """Generate demo data for testing"""
+    from utils.demo_data import init_demo_data
+    from models import User, StudentProfile, Employer, Job, Application
+    
+    models = {
+        'User': User,
+        'StudentProfile': StudentProfile, 
+        'Employer': Employer,
+        'Job': Job,
+        'Application': Application
+    }
+    
+    init_demo_data(db, models)
+    print("Demo data generated successfully!")
