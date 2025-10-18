@@ -1,1 +1,2058 @@
-temp
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPUT Admin Panel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 256px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.collapsed .sidebar-header h1 {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 12px 16px;
+            opacity: 0.7;
+            margin-top: 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: #1e40af;
+            font-weight: 500;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item span {
+            transition: opacity 0.3s;
+        }
+
+        .sidebar.collapsed .nav-item span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-header {
+            display: flex;
+            align-items: center;
+            background: #f3f4f6;
+            padding: 8px 16px;
+            border-radius: 8px;
+            width: 300px;
+        }
+
+        .search-header input {
+            background: none;
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .notification-btn,
+        .settings-btn {
+            position: relative;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .notification-btn:hover,
+        .settings-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            opacity: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.gradient-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .stat-card.gradient-green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .stat-card.gradient-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .stat-card.gradient-orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .stat-card.gradient-red {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .stat-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stat-info h3 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .stat-icon svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.8;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            opacity: 0;
+        }
+
+        .table-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        td {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-orange {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-purple {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            padding: 6px 10px;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #2563eb;
+        }
+
+        .icon-btn.delete {
+            color: #ef4444;
+        }
+
+        .icon-btn.delete:hover {
+            color: #dc2626;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+        }
+
+        .chart-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #1e40af;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab:hover {
+            color: #374151;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .mini-stat {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .mini-stat h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .mini-stat .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        @media (max-width: 1024px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100vh;
+                z-index: 999;
+                left: -256px;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .app-container.sidebar-open .sidebar {
+                left: 0;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-input {
+                min-width: 100%;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .search-header {
+                width: 200px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            td,
+            th {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>BPUT Admin</h1>
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showView('dashboard')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Dashboard</span>
+                </div>
+
+                <div class="nav-section-title">Management</div>
+                <div class="nav-item" onclick="showView('students')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    </svg>
+                    <span>Students</span>
+                </div>
+                <div class="nav-item" onclick="showView('opportunities')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <span>Opportunities</span>
+                </div>
+                <div class="nav-item" onclick="showView('companies')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v4"></path>
+                    </svg>
+                    <span>Companies</span>
+                </div>
+                <div class="nav-item" onclick="showView('placements')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Placements</span>
+                </div>
+
+                <div class="nav-section-title">Reports</div>
+                <div class="nav-item" onclick="showView('analytics')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13 16"></polyline>
+                        <polyline points="1 6 11 16"></polyline>
+                    </svg>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" onclick="showView('reports')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Reports</span>
+                </div>
+
+                <div class="nav-section-title">System</div>
+                <div class="nav-item" onclick="showView('settings')">
+                    <svg fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <div class="header-content">
+                    <div class="header-title">
+                        <h2 id="headerTitle">Dashboard</h2>
+                        <p id="headerSubtitle">Admin Control Panel</p>
+                    </div>
+                    <div class="header-actions">
+                        <div class="search-header">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <input type="text" placeholder="Search...">
+                        </div>
+                        <button class="notification-btn" title="Notifications">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            </svg>
+                            <span class="notification-badge"></span>
+                        </button>
+                        <button class="settings-btn" title="Settings">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6"></path>
+                                <path d="M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24"></path>
+                                <path d="M1 12h6m6 0h6"></path>
+                                <path d="M4.22 19.78l4.24-4.24m3.08-3.08l4.24-4.24"></path>
+                            </svg>
+                        </button>
+                        <div class="admin-avatar">A</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard View -->
+                <div id="dashboardView" class="view-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card gradient-blue">
+                            <div class="stat-info">
+                                <p>Total Students</p>
+                                <h3>150</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-green">
+                            <div class="stat-info">
+                                <p>Active Opportunities</p>
+                                <h3>50</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-purple">
+                            <div class="stat-info">
+                                <p>Partner Companies</p>
+                                <h3>28</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card gradient-orange">
+                            <div class="stat-info">
+                                <p>Placed Students</p>
+                                <h3>87</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <svg fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <h3>Placement Trends (Last 6 Months)</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="placementChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Department Distribution</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <h3>Skills in Demand</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="skillsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Salary Distribution</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="salaryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students View -->
+                <div id="studentsView" class="view-content">
+                    <div class="table-card">
+                        <h3>Student Management</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="openModal('studentModal')">+ Add Student</button>
+                            <button class="btn btn-secondary">Export to CSV</button>
+                            <button class="btn btn-secondary">Import Students</button>
+                        </div>
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="Search by name, email, or ID...">
+                            <select class="filter-select">
+                                <option>All Departments</option>
+                                <option>CSE</option>
+                                <option>IT</option>
+                                <option>ECE</option>
+                                <option>EEE</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>All Years</option>
+                                <option>Year 1</option>
+                                <option>Year 2</option>
+                                <option>Year 3</option>
+                                <option>Year 4</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>ID</th>
+                                        <th>Department</th>
+                                        <th>Year</th>
+                                        <th>CGPA</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opportunities View -->
+                <div id="opportunitiesView" class="view-content">
+                    <div class="table-card">
+                        <h3>Opportunity Management</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="openModal('opportunityModal')">+ Add
+                                Opportunity</button>
+                            <button class="btn btn-secondary">Export to CSV</button>
+                        </div>
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="Search opportunities...">
+                            <select class="filter-select">
+                                <option>All Types</option>
+                                <option>Internship</option>
+                                <option>Full-time</option>
+                                <option>Placement</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>All Status</option>
+                                <option>Active</option>
+                                <option>Closed</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Company</th>
+                                        <th>Type</th>
+                                        <th>Location</th>
+                                        <th>Salary</th>
+                                        <th>Applicants</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="opportunitiesTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Companies View -->
+                <div id="companiesView" class="view-content">
+                    <div class="table-card">
+                        <h3>Company Management</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="openModal('companyModal')">+ Add Company</button>
+                            <button class="btn btn-secondary">Export to CSV</button>
+                        </div>
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="Search companies...">
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Industry</th>
+                                        <th>Location</th>
+                                        <th>Contact Email</th>
+                                        <th>Active Roles</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="companiesTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placements View -->
+                <div id="placementsView" class="view-content">
+                    <div class="table-card">
+                        <h3>Placement Records</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="openModal('placementModal')">+ Add
+                                Placement</button>
+                            <button class="btn btn-secondary">Export to CSV</button>
+                            <button class="btn btn-secondary">Generate Report</button>
+                        </div>
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="Search by student or company...">
+                            <select class="filter-select">
+                                <option>All Years</option>
+                                <option>2024</option>
+                                <option>2023</option>
+                                <option>2022</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Company</th>
+                                        <th>Position</th>
+                                        <th>Salary (Annual)</th>
+                                        <th>Date</th>
+                                        <th>Department</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="placementsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics View -->
+                <div id="analyticsView" class="view-content">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab(this, 'overview')">Overview</button>
+                        <button class="tab" onclick="switchTab(this, 'detailed')">Detailed Analysis</button>
+                        <button class="tab" onclick="switchTab(this, 'predictions')">Predictions</button>
+                    </div>
+
+                    <div id="overview" class="tab-content active">
+                        <div class="stats-list">
+                            <div class="mini-stat">
+                                <h4>Overall Placement Rate</h4>
+                                <div class="value">58%</div>
+                            </div>
+                            <div class="mini-stat" style="border-left-color: #10b981;">
+                                <h4>Average Salary</h4>
+                                <div class="value">₹45.2L</div>
+                            </div>
+                            <div class="mini-stat" style="border-left-color: #8b5cf6;">
+                                <h4>Highest Package</h4>
+                                <div class="value">₹85L</div>
+                            </div>
+                            <div class="mini-stat" style="border-left-color: #f59e0b;">
+                                <h4>Companies Hired</h4>
+                                <div class="value">28</div>
+                            </div>
+                        </div>
+                        <div class="chart-grid">
+                            <div class="chart-card">
+                                <h3>Monthly Placements</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Placement by Department</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="deptPlacementChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="detailed" class="tab-content">
+                        <div class="chart-grid">
+                            <div class="chart-card">
+                                <h3>Average Salary by Department</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="salaryByDeptChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Top Hiring Companies</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="topCompaniesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="predictions" class="tab-content">
+                        <div class="info-box">
+                            <strong>Predictive Analysis:</strong> Based on current trends and historical data, the
+                            system predicts a 65% placement rate for the next batch with an average salary increase of
+                            8-12%.
+                        </div>
+                        <div class="chart-grid">
+                            <div class="chart-card">
+                                <h3>Projected Placements (Next 6 Months)</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="projectionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports View -->
+                <div id="reportsView" class="view-content">
+                    <div class="table-card">
+                        <h3>Generate Reports</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="generateReport('placement')">Placement
+                                Report</button>
+                            <button class="btn btn-primary" onclick="generateReport('salary')">Salary Analysis</button>
+                            <button class="btn btn-primary" onclick="generateReport('skills')">Skills Report</button>
+                            <button class="btn btn-primary" onclick="generateReport('company')">Company Report</button>
+                        </div>
+                        <h3 style="margin-top: 32px;">Recent Reports</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Type</th>
+                                        <th>Generated Date</th>
+                                        <th>Period</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settingsView" class="view-content">
+                    <div class="table-card">
+                        <h3>System Settings</h3>
+                        <div class="form-group">
+                            <label>Platform Name</label>
+                            <input type="text" value="BPUT AI Career Connect">
+                        </div>
+                        <div class="form-group">
+                            <label>Institute Email</label>
+                            <input type="email" value="admin@bput.ac.in">
+                        </div>
+                        <div class="form-group">
+                            <label>Support Email</label>
+                            <input type="email" value="support@bput.ac.in">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" value="+91-XXXXXXXXXX">
+                        </div>
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">Email Notifications</h3>
+                        <div class="form-group">
+                            <input type="checkbox" checked> Send placement notifications to students
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" checked> Send weekly reports to admin
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox"> Send daily summary emails
+                        </div>
+                        <h3 style="margin-top: 32px; margin-bottom: 16px;">Data Management</h3>
+                        <div class="action-bar">
+                            <button class="btn btn-secondary">Backup Data</button>
+                            <button class="btn btn-secondary">Clear Cache</button>
+                            <button class="btn btn-danger">Reset Platform</button>
+                        </div>
+                        <div style="margin-top: 32px;">
+                            <button class="btn btn-primary" style="width: 100%;">Save Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add New Student</span>
+                <button class="close-btn" onclick="closeModal('studentModal')">&times;</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" placeholder="Enter full name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" placeholder="student@bput.ac.in" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Roll Number *</label>
+                        <input type="text" placeholder="STU001" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select required>
+                            <option>Select Department</option>
+                            <option>CSE</option>
+                            <option>IT</option>
+                            <option>ECE</option>
+                            <option>EEE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Year *</label>
+                        <select required>
+                            <option>Select Year</option>
+                            <option>Year 1</option>
+                            <option>Year 2</option>
+                            <option>Year 3</option>
+                            <option>Year 4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>CGPA</label>
+                        <input type="number" step="0.01" min="0" max="10" placeholder="8.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" placeholder="+91-XXXXXXXXXX">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Opportunity Modal -->
+    <div id="opportunityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add New Opportunity</span>
+                <button class="close-btn" onclick="closeModal('opportunityModal')">&times;</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>Job Title *</label>
+                    <input type="text" placeholder="e.g., Software Engineer" required>
+                </div>
+                <div class="form-group">
+                    <label>Company *</label>
+                    <select required>
+                        <option>Select Company</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Job Type *</label>
+                        <select required>
+                            <option>Select Type</option>
+                            <option>Internship</option>
+                            <option>Full-time</option>
+                            <option>Placement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location *</label>
+                        <input type="text" placeholder="e.g., Bangalore" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Salary (Monthly) *</label>
+                        <input type="number" placeholder="50000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Openings</label>
+                        <input type="number" value="1" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea placeholder="Enter job description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Required Skills</label>
+                    <input type="text" placeholder="Python, Java, React (comma separated)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('opportunityModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Opportunity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Modal -->
+    <div id="companyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add New Company</span>
+                <button class="close-btn" onclick="closeModal('companyModal')">&times;</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>Company Name *</label>
+                    <input type="text" placeholder="Enter company name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Industry *</label>
+                        <select required>
+                            <option>Select Industry</option>
+                            <option>IT</option>
+                            <option>Finance</option>
+                            <option>Healthcare</option>
+                            <option>E-commerce</option>
+                            <option>Manufacturing</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="e.g., Bangalore">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Email *</label>
+                        <input type="email" placeholder="hr@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Phone</label>
+                        <input type="tel" placeholder="+91-XXXXXXXXXX">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" placeholder="https://company.com">
+                </div>
+                <div class="form-group">
+                    <label>Company Overview</label>
+                    <textarea placeholder="Enter company details..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('companyModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Company</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Placement Modal -->
+    <div id="placementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add Placement Record</span>
+                <button class="close-btn" onclick="closeModal('placementModal')">&times;</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <select required>
+                        <option>Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Company *</label>
+                    <select required>
+                        <option>Select Company</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Position *</label>
+                        <input type="text" placeholder="e.g., Software Engineer" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Annual Salary *</label>
+                        <input type="number" placeholder="500000" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Joining Date</label>
+                    <input type="date">
+                </div>
+                <div class="form-group">
+                    <label>Placement Type</label>
+                    <select>
+                        <option>Full-time</option>
+                        <option>Internship</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('placementModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Record Placement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Demo Data
+        const departments = ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'];
+        const companies = ['TCS', 'Infosys', 'Wipro', 'Cognizant', 'Accenture', 'Amazon', 'Microsoft', 'Google', 'IBM', 'Deloitte'];
+        const industries = ['IT', 'Finance', 'Healthcare', 'E-commerce', 'Manufacturing'];
+
+        const studentsData = Array.from({ length: 25 }, (_, i) => ({
+            id: `STU${String(i + 1).padStart(4, '0')}`,
+            name: `Student ${i + 1}`,
+            email: `student${i + 1}@bput.ac.in`,
+            department: departments[Math.floor(Math.random() * departments.length)],
+            year: Math.floor(Math.random() * 4) + 1,
+            cgpa: (6 + Math.random() * 3.5).toFixed(2),
+            status: Math.random() > 0.3 ? 'Active' : 'Inactive'
+        }));
+
+        const opportunitiesData = Array.from({ length: 20 }, (_, i) => ({
+            id: `OPP${String(i + 1).padStart(4, '0')}`,
+            title: ['Python Developer', 'Java Developer', 'JavaScript Developer', 'React Developer', 'Data Scientist'][i % 5],
+            company: companies[Math.floor(Math.random() * companies.length)],
+            type: Math.random() > 0.5 ? 'Internship' : 'Full-time',
+            location: ['Bangalore', 'Hyderabad', 'Remote', 'Mumbai'][Math.floor(Math.random() * 4)],
+            salary: Math.floor(30000 + Math.random() * 100000),
+            applicants: Math.floor(5 + Math.random() * 40),
+            status: Math.random() > 0.3 ? 'Active' : 'Closed'
+        }));
+
+        const companiesData = Array.from({ length: 10 }, (_, i) => ({
+            id: `COM${String(i + 1).padStart(4, '0')}`,
+            name: companies[i],
+            industry: industries[Math.floor(Math.random() * industries.length)],
+            location: ['Bangalore', 'Hyderabad', 'Mumbai', 'Delhi'][Math.floor(Math.random() * 4)],
+            contact: `hr@${companies[i].toLowerCase()}.com`,
+            activeRoles: Math.floor(2 + Math.random() * 15),
+            status: 'Active'
+        }));
+
+        const placementsData = Array.from({ length: 15 }, (_, i) => ({
+            id: `PLC${String(i + 1).padStart(4, '0')}`,
+            student: `Student ${i + 10}`,
+            company: companies[Math.floor(Math.random() * companies.length)],
+            position: ['Software Engineer', 'Data Analyst', 'Developer', 'Consultant'][Math.floor(Math.random() * 4)],
+            salary: Math.floor(40 + Math.random() * 50) * 100000,
+            date: new Date(2024, Math.floor(Math.random() * 10), Math.floor(Math.random() * 28) + 1).toLocaleDateString(),
+            department: departments[Math.floor(Math.random() * departments.length)],
+            status: 'Confirmed'
+        }));
+
+        const reportsData = [
+            { name: 'Q3 Placement Report', type: 'Placement', date: '2024-09-15', period: 'Jul - Sep 2024', status: 'Completed' },
+            { name: 'Salary Analysis 2024', type: 'Salary', date: '2024-09-10', period: 'Jan - Sep 2024', status: 'Completed' },
+            { name: 'Skills Demand Report', type: 'Skills', date: '2024-09-05', period: '2024', status: 'Completed' }
+        ];
+
+        // Navigation
+        function showView(viewName) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(`${viewName}View`).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+
+            const titles = {
+                dashboard: ['Dashboard', 'Admin Control Panel - Key Metrics'],
+                students: ['Student Management', 'Manage all enrolled students'],
+                opportunities: ['Opportunity Management', 'Manage job and internship postings'],
+                companies: ['Company Management', 'Manage partner companies'],
+                placements: ['Placement Records', 'View and manage student placements'],
+                analytics: ['Analytics & Insights', 'Detailed analysis and predictions'],
+                reports: ['Reports', 'Generate and view system reports'],
+                settings: ['System Settings', 'Configure platform settings']
+            };
+
+            document.getElementById('headerTitle').textContent = titles[viewName][0];
+            document.getElementById('headerSubtitle').textContent = titles[viewName][1];
+
+            if (viewName === 'dashboard') {
+                setTimeout(() => initCharts(), 100);
+            }
+
+            animateView(viewName);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            gsap.fromTo(`#${modalId}`,
+                { opacity: 0 },
+                { opacity: 1, duration: 0.3, ease: 'power2.out' }
+            );
+            gsap.fromTo(`#${modalId} .modal-content`,
+                { opacity: 0, scale: 0.95 },
+                { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.7)' }
+            );
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            gsap.to(`#${modalId}`, {
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => modal.classList.remove('active')
+            });
+        }
+
+        function switchTab(tab, tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function generateReport(type) {
+            alert(`Generating ${type} report...`);
+        }
+
+        // Animation
+        function animateView(viewName) {
+            if (viewName === 'dashboard') {
+                gsap.fromTo('.stat-card',
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+                );
+                gsap.fromTo('.chart-card',
+                    { opacity: 0, y: 40 },
+                    { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, delay: 0.4, ease: 'power3.out' }
+                );
+            } else {
+                gsap.fromTo('.table-card',
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+                );
+            }
+        }
+
+        // Render Tables
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = studentsData.map(student => `
+                <tr>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.email}</td>
+                    <td><strong>${student.id}</strong></td>
+                    <td><span class="badge badge-blue">${student.department}</span></td>
+                    <td>Year ${student.year}</td>
+                    <td><strong>${student.cgpa}</strong></td>
+                    <td><span class="badge ${student.status === 'Active' ? 'badge-green' : 'badge-orange'}">${student.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="icon-btn">Edit</button>
+                            <button class="icon-btn delete">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderOpportunitiesTable() {
+            const tbody = document.getElementById('opportunitiesTable');
+            tbody.innerHTML = opportunitiesData.map(opp => `
+                <tr>
+                    <td><strong>${opp.title}</strong></td>
+                    <td>${opp.company}</td>
+                    <td><span class="badge badge-blue">${opp.type}</span></td>
+                    <td>${opp.location}</td>
+                    <td>₹${opp.salary.toLocaleString()}</td>
+                    <td><span class="badge badge-purple">${opp.applicants}</span></td>
+                    <td><span class="badge ${opp.status === 'Active' ? 'badge-green' : 'badge-red'}">${opp.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="icon-btn">Edit</button>
+                            <button class="icon-btn delete">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCompaniesTable() {
+            const tbody = document.getElementById('companiesTable');
+            tbody.innerHTML = companiesData.map(company => `
+                <tr>
+                    <td><strong>${company.name}</strong></td>
+                    <td>${company.industry}</td>
+                    <td>${company.location}</td>
+                    <td>${company.contact}</td>
+                    <td><span class="badge badge-blue">${company.activeRoles} Roles</span></td>
+                    <td><span class="badge badge-green">${company.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="icon-btn">Edit</button>
+                            <button class="icon-btn delete">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPlacementsTable() {
+            const tbody = document.getElementById('placementsTable');
+            tbody.innerHTML = placementsData.map(placement => `
+                <tr>
+                    <td><strong>${placement.student}</strong></td>
+                    <td>${placement.company}</td>
+                    <td>${placement.position}</td>
+                    <td>₹${(placement.salary / 100000).toFixed(1)}L</td>
+                    <td>${placement.date}</td>
+                    <td><span class="badge badge-blue">${placement.department}</span></td>
+                    <td><span class="badge badge-green">${placement.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="icon-btn">Edit</button>
+                            <button class="icon-btn delete">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderReportsTable() {
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = reportsData.map((report, i) => `
+                <tr>
+                    <td><strong>${report.name}</strong></td>
+                    <td><span class="badge badge-blue">${report.type}</span></td>
+                    <td>${report.date}</td>
+                    <td>${report.period}</td>
+                    <td><span class="badge badge-green">${report.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="icon-btn">Download</button>
+                            <button class="icon-btn delete">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize Charts
+        let placementChartInstance = null;
+        let deptChartInstance = null;
+        let skillsChartInstance = null;
+        let salaryChartInstance = null;
+        let monthlyChartInstance = null;
+        let deptPlacementChartInstance = null;
+        let salaryByDeptChartInstance = null;
+        let topCompaniesChartInstance = null;
+        let projectionChartInstance = null;
+
+        function initCharts() {
+            // Destroy existing charts
+            [placementChartInstance, deptChartInstance, skillsChartInstance, salaryChartInstance, monthlyChartInstance, deptPlacementChartInstance, salaryByDeptChartInstance, topCompaniesChartInstance, projectionChartInstance].forEach(chart => {
+                if (chart) chart.destroy();
+            });
+
+            // Placement Chart
+            if (document.getElementById('placementChart')) {
+                placementChartInstance = new Chart(document.getElementById('placementChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Placements',
+                            data: [12, 19, 15, 25, 28, 35],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            // Department Chart
+            if (document.getElementById('deptChart')) {
+                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: departments,
+                        datasets: [{
+                            data: [35, 28, 25, 22, 20, 20],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            // Skills Chart
+            if (document.getElementById('skillsChart')) {
+                skillsChartInstance = new Chart(document.getElementById('skillsChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Python', 'Java', 'JavaScript', 'React', 'Node.js', 'ML', 'Data Science'],
+                        datasets: [{
+                            label: 'Demand',
+                            data: [85, 72, 68, 65, 60, 55, 50],
+                            backgroundColor: '#8b5cf6'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Salary Chart
+            if (document.getElementById('salaryChart')) {
+                salaryChartInstance = new Chart(document.getElementById('salaryChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['0-25L', '25-40L', '40-55L', '55-70L', '70-85L', '85L+'],
+                        datasets: [{
+                            label: 'Number of Placements',
+                            data: [15, 35, 25, 8, 3, 1],
+                            backgroundColor: '#f59e0b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Monthly Chart
+            if (document.getElementById('monthlyChart')) {
+                monthlyChartInstance = new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                        datasets: [{
+                            label: 'Placements',
+                            data: [8, 12, 10, 15, 18, 22, 20, 16],
+                            backgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Department Placement Chart
+            if (document.getElementById('deptPlacementChart')) {
+                deptPlacementChartInstance = new Chart(document.getElementById('deptPlacementChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: departments,
+                        datasets: [{
+                            label: 'Placements',
+                            data: [32, 28, 22, 18, 15, 12],
+                            backgroundColor: '#10b981'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Salary by Department Chart
+            if (document.getElementById('salaryByDeptChart')) {
+                salaryByDeptChartInstance = new Chart(document.getElementById('salaryByDeptChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: departments,
+                        datasets: [{
+                            label: 'Average Salary (Lakhs)',
+                            data: [65, 62, 58, 55, 52, 50],
+                            backgroundColor: '#8b5cf6'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Top Companies Chart
+            if (document.getElementById('topCompaniesChart')) {
+                topCompaniesChartInstance = new Chart(document.getElementById('topCompaniesChart').getContext('2d'), {
+                    type: 'horizontalBar',
+                    data: {
+                        labels: ['TCS', 'Infosys', 'Wipro', 'Google', 'Amazon'],
+                        datasets: [{
+                            label: 'Hires',
+                            data: [45, 38, 32, 25, 20],
+                            backgroundColor: '#f59e0b'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Projection Chart
+            if (document.getElementById('projectionChart')) {
+                projectionChartInstance = new Chart(document.getElementById('projectionChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                        datasets: [{
+                            label: 'Projected Placements',
+                            data: [28, 35, 40, 38, 45, 50],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            gsap.fromTo('.stat-card',
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+            );
+
+            gsap.fromTo('.chart-card',
+                { opacity: 0, y: 40 },
+                { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, delay: 0.4, ease: 'power3.out' }
+            );
+
+            gsap.from('.nav-item', {
+                x: 0,
+                duration: 0.5,
+                stagger: 0.1,
+                ease: 'power3.out'
+            });
+
+            setTimeout(() => {
+                initCharts();
+            }, 100);
+
+            renderStudentsTable();
+            renderOpportunitiesTable();
+            renderCompaniesTable();
+            renderPlacementsTable();
+            renderReportsTable();
+
+            // Close modal on outside click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            // Notification bell animation
+            gsap.to('.notification-badge', {
+                scale: 1.2,
+                duration: 0.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+
+            // Button hover effects
+            document.querySelectorAll('.btn, .icon-btn, .menu-toggle, .notification-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', (e) => {
+                    gsap.to(e.target, {
+                        scale: 1.05,
+                        duration: 0.2,
+                        ease: 'power2.out'
+                    });
+                });
+
+                btn.addEventListener('mouseleave', (e) => {
+                    gsap.to(e.target, {
+                        scale: 1,
+                        duration: 0.2,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+
+            // Table row animations
+            gsap.fromTo('tbody tr',
+                { opacity: 0, x: -20 },
+                { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+            );
+
+            // Nav item click animation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    gsap.fromTo(e.currentTarget,
+                        { scale: 0.95 },
+                        { scale: 1, duration: 0.3, ease: 'back.out(2)' }
+                    );
+                });
+            });
+
+            // Avatar floating animation
+            gsap.to('.admin-avatar', {
+                y: -3,
+                duration: 1.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+
+        // Search functionality
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('search-input')) {
+                const searchTerm = e.target.value.toLowerCase();
+                const table = e.target.closest('.table-card').querySelector('table');
+                const rows = table.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            }
+        });
+
+        // Filter functionality
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-select')) {
+                console.log('Filter applied:', e.target.value);
+            }
+        });
+    </script>
+</body>
+
+</html>
