@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify, session
-from models.user import User, db
-from models.profile import StudentProfile
-from models.job import Job
-from models.application import Application
+from backend import User, db
+from backend import StudentProfile
+from backend import Job
+from backend import Application
 from utils.helpers import save_uploaded_file, calculate_career_readiness_score, skills_similarity
 from ai_engine.resume_parser import parse_resume
 from ai_engine.matching_algorithm import get_job_recommendations
-from backend.ai_engine.career_recommender import get_career_recommendations
+from ai_engine.career_recommender import get_career_recommendations
 import os
 
 student_bp = Blueprint('student', __name__)
@@ -31,11 +31,12 @@ def get_profile():
             return jsonify({'error': 'Not authenticated or not a student'}), 401
         
         return jsonify({
+            'success': True,
             'profile': student.to_dict()
         }), 200
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get profile: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/profile', methods=['POST'])
 def update_profile():
@@ -66,13 +67,14 @@ def update_profile():
         db.session.commit()
         
         return jsonify({
+            'success': True,
             'message': 'Profile updated successfully',
             'profile': student.to_dict()
         }), 200
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Failed to update profile: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/upload-resume', methods=['POST'])
 def upload_resume():
@@ -96,16 +98,22 @@ def upload_resume():
         # Update student's resume path
         student.resume_path = filename
         
-        # Parse resume using AI
-        resume_data = parse_resume(os.path.join('uploads', filename))
+        # Parse resume
+        file_path = os.path.join('uploads', filename)
+        resume_data = parse_resume(file_path)
         
         # Update profile with parsed data
         if resume_data:
-            if resume_data.get('skills'):
-                student.skills = ','.join(resume_data['skills'])
-            if resume_data.get('education'):
-                # You might want to parse education data more carefully
-                pass
+            if resume_data.get('skills', {}).get('technical'):
+                student.skills = ','.join(resume_data['skills']['technical'])
+            
+            if resume_data.get('education') and len(resume_data['education']) > 0:
+                edu = resume_data['education'][0]
+                if edu.get('cgpa'):
+                    try:
+                        student.cgpa = float(edu['cgpa'])
+                    except:
+                        pass
         
         # Recalculate scores
         student.calculate_profile_completeness()
@@ -114,6 +122,7 @@ def upload_resume():
         db.session.commit()
         
         return jsonify({
+            'success': True,
             'message': 'Resume uploaded and parsed successfully',
             'resume_data': resume_data,
             'profile': student.to_dict()
@@ -121,7 +130,7 @@ def upload_resume():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Failed to upload resume: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/recommendations', methods=['GET'])
 def get_recommendations():
@@ -130,16 +139,17 @@ def get_recommendations():
         if not student:
             return jsonify({'error': 'Not authenticated or not a student'}), 401
         
-        # Get career recommendations from AI engine
+        # Get career recommendations
         recommendations = get_career_recommendations(student)
         
         return jsonify({
+            'success': True,
             'recommendations': recommendations,
             'career_score': student.career_score
         }), 200
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get recommendations: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/matched-jobs', methods=['GET'])
 def get_matched_jobs():
@@ -152,12 +162,13 @@ def get_matched_jobs():
         jobs_with_matches = get_job_recommendations(student)
         
         return jsonify({
+            'success': True,
             'matched_jobs': jobs_with_matches,
             'total_count': len(jobs_with_matches)
         }), 200
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get matched jobs: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/apply/<int:job_id>', methods=['POST'])
 def apply_to_job(job_id):
@@ -182,25 +193,33 @@ def apply_to_job(job_id):
         # Calculate match score
         match_score = skills_similarity(student.skills, job.required_skills)
         
+        # Get cover letter from request
+        cover_letter = ''
+        if request.is_json:
+            data = request.get_json()
+            cover_letter = data.get('cover_letter', '')
+        
         # Create new application
         application = Application(
             student_id=student.id,
             job_id=job_id,
             match_score=match_score,
-            cover_letter=request.get_json().get('cover_letter', '') if request.is_json else ''
+            cover_letter=cover_letter,
+            status='pending'
         )
         
         db.session.add(application)
         db.session.commit()
         
         return jsonify({
+            'success': True,
             'message': 'Application submitted successfully',
             'application': application.to_dict()
         }), 201
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': f'Failed to apply to job: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @student_bp.route('/applications', methods=['GET'])
 def get_applications():
@@ -213,8 +232,45 @@ def get_applications():
             .order_by(Application.applied_date.desc()).all()
         
         return jsonify({
-            'applications': [app.to_dict() for app in applications]
+            'success': True,
+            'applications': [app.to_dict() for app in applications],
+            'total': len(applications)
         }), 200
         
     except Exception as e:
-        return jsonify({'error': f'Failed to get applications: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@student_bp.route('/dashboard-stats', methods=['GET'])
+def get_dashboard_stats():
+    """Get statistics for student dashboard"""
+    try:
+        student = get_current_student()
+        if not student:
+            return jsonify({'error': 'Not authenticated or not a student'}), 401
+        
+        # Get application statistics
+        total_applications = Application.query.filter_by(student_id=student.id).count()
+        pending_applications = Application.query.filter_by(
+            student_id=student.id, status='pending'
+        ).count()
+        accepted_applications = Application.query.filter_by(
+            student_id=student.id, status='accepted'
+        ).count()
+        
+        # Get matched jobs count
+        matched_jobs = get_job_recommendations(student, limit=5)
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_applications': total_applications,
+                'pending_applications': pending_applications,
+                'accepted_applications': accepted_applications,
+                'matched_jobs_count': len(matched_jobs),
+                'career_score': student.career_score or 0,
+                'profile_completeness': student.profile_completeness or 0
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
