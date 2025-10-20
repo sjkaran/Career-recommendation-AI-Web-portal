@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('employer.dashboard') }}">
+        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('employer.jobs') }}">
+        <i class="bi bi-briefcase me-1"></i>Job Postings
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('employer.candidates') }}">
+        <i class="bi bi-people me-1"></i>Candidates
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('employer.applications') }}">
+        <i class="bi bi-file-text me-1"></i>Applications
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('employer.company_profile') }}">
+        <i class="bi bi-building me-1"></i>Company
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Company Summary -->
+                    <div class="text-center mb-4">
+                        <div class="company-logo mx-auto mb-3"
+                            style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <i class="bi bi-building text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="mb-1">{{ current_user.company_name if current_user else 'Company Name' }}</h6>
+                        <small class="text-muted">{{ current_user.email if current_user else 'company@example.com'
+                            }}</small>
+                    </div>
+
+                    <!-- Company Stats -->
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block active_jobs %}5{% endblock %}
+                            </div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Active Jobs</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block total_applications %}23{%
+                                endblock %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Applications</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block hired_candidates %}8{% endblock
+                                %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Hired</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('employer.post_job') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Post New Job
+                        </a>
+                        <a href="{{ url_for('employer.browse_candidates') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-search me-1"></i>Browse Candidates
+                        </a>
+                        <a href="{{ url_for('employer.company_profile') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-building me-1"></i>Company Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h6>
+                </div>
+                <div class="card-body">
+                    <div class="activity-item mb-3">
+                        <div class="d-flex">
+                            <div class="activity-icon me-3">
+                                <i class="bi bi-person-plus text-success"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">New application received for Frontend Developer</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item mb-3">
+                        <div class="d-flex">
+                            <div class="activity-icon me-3">
+                                <i class="bi bi-briefcase text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Job posting "Backend Developer" published</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="d-flex">
+                            <div class="activity-icon me-3">
+                                <i class="bi bi-star text-warning"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Candidate shortlisted for Data Analyst role</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">1 day ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Status -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i class="bi bi-gem text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <h6 class="mb-1">Premium Plan</h6>
+                    <small class="text-muted">Unlimited job postings</small>
+                    <div class="mt-2">
+                        <a href="#" class="btn btn-outline-warning btn-sm">Manage Plan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            {% block employer_content %}
+            <!-- Employer-specific content goes here -->
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-item {
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .activity-icon {
+        width: 24px;
+        text-align: center;
+    }
+
+    .company-logo {
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,444 @@
+{% extends "layouts/student_layout.html" %}
+
+{% block title %}Student Dashboard - AI Career Platform{% endblock %}
+
+{% block student_content %}
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Welcome back, {{ current_user.username if current_user else 'Student' }}!</h2>
+        <p class="text-muted mb-0">Here's your career journey overview</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+        <a href="{{ url_for('student.profile_edit') }}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i>Edit Profile
+        </a>
+    </div>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="profile-completion">75%</div>
+                    <div class="stat-label">Profile Complete</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-person-check text-primary" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="job-matches">12</div>
+                    <div class="stat-label">Job Matches</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-briefcase text-success" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="applications-sent">5</div>
+                    <div class="stat-label">Applications</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-file-text text-warning" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="recommendations">8</div>
+                    <div class="stat-label">Recommendations</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-lightbulb text-info" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Row -->
+<div class="row g-4">
+    <!-- Career Recommendations -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>AI Career Recommendations</h5>
+                <a href="{{ url_for('student.recommendations') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div id="recommendations-container">
+                    <!-- Recommendations will be loaded here -->
+                    <div class="text-center py-4">
+                        <div class="loading-spinner mb-2"></div>
+                        <p class="text-muted">Loading recommendations...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Job Matches -->
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Recent Job Matches</h5>
+                <a href="{{ url_for('student.jobs') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div id="job-matches-container">
+                    <!-- Job matches will be loaded here -->
+                    <div class="text-center py-4">
+                        <div class="loading-spinner mb-2"></div>
+                        <p class="text-muted">Loading job matches...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Content -->
+    <div class="col-lg-4">
+        <!-- Profile Completion -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Complete Your Profile</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Overall Progress</small>
+                        <small class="text-primary fw-bold" id="completion-percentage">75%</small>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" id="completion-bar" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <div id="completion-suggestions">
+                    <!-- Completion suggestions will be loaded here -->
+                </div>
+                
+                <div class="d-grid mt-3">
+                    <a href="{{ url_for('student.profile_edit') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Complete Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('student.upload_resume') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-upload me-2"></i>Upload Resume
+                    </a>
+                    <a href="{{ url_for('student.skill_assessment') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-clipboard-check me-2"></i>Take Skill Assessment
+                    </a>
+                    <a href="{{ url_for('student.career_roadmap') }}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-map me-2"></i>View Career Roadmap
+                    </a>
+                    <a href="{{ url_for('student.networking') }}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-people me-2"></i>Network with Alumni
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Achievements -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-trophy me-2"></i>Recent Achievements</h6>
+            </div>
+            <div class="card-body">
+                <div id="achievements-container">
+                    <!-- Achievements will be loaded here -->
+                    <div class="achievement-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="achievement-badge me-3">
+                                <i class="bi bi-star-fill text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Profile Pioneer</div>
+                                <small class="text-muted">Completed 75% of profile</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="achievement-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="achievement-badge me-3">
+                                <i class="bi bi-briefcase-fill text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Job Hunter</div>
+                                <small class="text-muted">Applied to 5 positions</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('student.achievements') }}" class="btn btn-sm btn-outline-primary">
+                            View All Achievements
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.achievement-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.achievement-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.achievement-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.recommendation-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+    border-color: var(--primary-blue);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.job-match-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.job-match-card:hover {
+    border-color: var(--success-green);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.stat-icon {
+    opacity: 0.7;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+async function loadDashboardData() {
+    try {
+        // Load profile completion
+        await loadProfileCompletion();
+        
+        // Load recommendations
+        await loadRecommendations();
+        
+        // Load job matches
+        await loadJobMatches();
+        
+        // Load achievements
+        await loadAchievements();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        CP.utils.showToast('Failed to load dashboard data', 'error');
+    }
+}
+
+async function loadProfileCompletion() {
+    try {
+        const response = await CP.api.get('/student/profile/completion');
+        
+        if (response.success) {
+            const completion = response.completion_score;
+            document.getElementById('profile-completion').textContent = completion + '%';
+            document.getElementById('completion-percentage').textContent = completion + '%';
+            document.getElementById('completion-bar').style.width = completion + '%';
+            
+            // Load suggestions
+            const suggestionsContainer = document.getElementById('completion-suggestions');
+            if (response.suggestions && response.suggestions.length > 0) {
+                suggestionsContainer.innerHTML = response.suggestions.map(suggestion => 
+                    `<div class="suggestion-item mb-2">
+                        <i class="bi bi-arrow-right text-primary me-2"></i>
+                        <small class="text-muted">${suggestion}</small>
+                    </div>`
+                ).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading profile completion:', error);
+    }
+}
+
+async function loadRecommendations() {
+    try {
+        const response = await CP.api.get('/student/recommendations');
+        const container = document.getElementById('recommendations-container');
+        
+        if (response.success && response.recommendations) {
+            container.innerHTML = response.recommendations.slice(0, 3).map(rec => 
+                `<div class="recommendation-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold text-primary mb-0">${rec.career_domain}</h6>
+                        <span class="badge bg-success">${rec.match_score}% Match</span>
+                    </div>
+                    <p class="text-muted mb-2">${rec.description}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Updated ${CP.utils.formatDate(rec.updated_at)}
+                        </small>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Learn More</a>
+                    </div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-lightbulb text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">Complete your profile to get AI-powered career recommendations</p>
+                    <a href="${window.location.origin}/student/profile" class="btn btn-primary">Complete Profile</a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading recommendations:', error);
+        document.getElementById('recommendations-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">Failed to load recommendations</p>
+            </div>
+        `;
+    }
+}
+
+async function loadJobMatches() {
+    try {
+        const response = await CP.api.get('/student/jobs');
+        const container = document.getElementById('job-matches-container');
+        
+        if (response.success && response.jobs) {
+            container.innerHTML = response.jobs.slice(0, 3).map(job => 
+                `<div class="job-match-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-1">${job.title}</h6>
+                            <p class="text-muted mb-0">${job.company_name}</p>
+                        </div>
+                        <span class="badge bg-primary">${job.match_score}% Match</span>
+                    </div>
+                    <div class="job-meta mb-2">
+                        <span class="job-meta-item">
+                            <i class="bi bi-geo-alt"></i>${job.location}
+                        </span>
+                        <span class="job-meta-item">
+                            <i class="bi bi-currency-rupee"></i>${job.salary_range}
+                        </span>
+                        <span class="job-meta-item">
+                            <i class="bi bi-clock"></i>${job.experience_level}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar me-1"></i>Posted ${CP.utils.formatDate(job.created_at)}
+                        </small>
+                        <a href="#" class="btn btn-sm btn-primary">Apply Now</a>
+                    </div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No job matches found. Complete your profile to get better matches.</p>
+                    <a href="${window.location.origin}/student/profile" class="btn btn-primary">Complete Profile</a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading job matches:', error);
+        document.getElementById('job-matches-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">Failed to load job matches</p>
+            </div>
+        `;
+    }
+}
+
+async function loadAchievements() {
+    try {
+        const response = await CP.api.get('/student/achievements');
+        
+        if (response.success && response.achievements) {
+            const container = document.getElementById('achievements-container');
+            // Update with real achievements data when available
+        }
+    } catch (error) {
+        console.error('Error loading achievements:', error);
+    }
+}
+
+function refreshDashboard() {
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    CP.utils.showLoading(button);
+    
+    loadDashboardData().finally(() => {
+        CP.utils.hideLoading(button, originalText);
+        CP.utils.showToast('Dashboard refreshed', 'success');
+    });
+}
+</script>
+{% endblock %}

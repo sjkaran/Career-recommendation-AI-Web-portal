@@ -1,0 +1,732 @@
+{% extends "layouts/employer_layout.html" %}
+
+{% block title %}Browse Candidates - AI Career Platform{% endblock %}
+
+{% block employer_content %}
+<!-- Candidates Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Browse Candidates</h2>
+        <p class="text-muted mb-0">Find the perfect candidates for your open positions</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="exportCandidates()">
+            <i class="bi bi-download me-1"></i>Export
+        </button>
+        <button class="btn btn-outline-secondary" onclick="bulkInvite()">
+            <i class="bi bi-envelope me-1"></i>Bulk Invite
+        </button>
+        <button class="btn btn-primary" onclick="refreshCandidates()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="search-input" class="form-label">Search Candidates</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search-input" 
+                           placeholder="Search by name, skills, or keywords...">
+                    <button class="btn btn-outline-primary" onclick="searchCandidates()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="branch-filter" class="form-label">Branch</label>
+                <select class="form-select" id="branch-filter" onchange="applyFilters()">
+                    <option value="">All Branches</option>
+                    <option value="Computer Science Engineering">CSE</option>
+                    <option value="Information Technology">IT</option>
+                    <option value="Electronics & Communication">ECE</option>
+                    <option value="Electrical Engineering">EE</option>
+                    <option value="Mechanical Engineering">ME</option>
+                    <option value="Civil Engineering">CE</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="year-filter" class="form-label">Year</label>
+                <select class="form-select" id="year-filter" onchange="applyFilters()">
+                    <option value="">All Years</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                    <option value="Graduate">Graduate</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="cgpa-filter" class="form-label">Min CGPA</label>
+                <select class="form-select" id="cgpa-filter" onchange="applyFilters()">
+                    <option value="">Any CGPA</option>
+                    <option value="9.0">9.0+</option>
+                    <option value="8.5">8.5+</option>
+                    <option value="8.0">8.0+</option>
+                    <option value="7.5">7.5+</option>
+                    <option value="7.0">7.0+</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="sort-by" class="form-label">Sort By</label>
+                <select class="form-select" id="sort-by" onchange="applyFilters()">
+                    <option value="relevance">Relevance</option>
+                    <option value="cgpa">CGPA (High to Low)</option>
+                    <option value="profile_completion">Profile Completion</option>
+                    <option value="recent">Recently Updated</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Skills Filter -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <label class="form-label">Filter by Skills</label>
+                <div class="skills-filter-container">
+                    <input type="text" class="form-control" id="skills-filter-input" 
+                           placeholder="Add skills to filter by...">
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSkillFilter()">
+                        <i class="bi bi-plus"></i> Add Skill
+                    </button>
+                </div>
+                <div class="selected-skills mt-2" id="selected-skills-container">
+                    <!-- Selected skills will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Filters -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <label class="form-label">Quick Filters</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-primary btn-sm filter-tag" data-filter="high-cgpa" onclick="toggleQuickFilter(this)">
+                        High CGPA (8.5+)
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm filter-tag" data-filter="final-year" onclick="toggleQuickFilter(this)">
+                        Final Year Students
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm filter-tag" data-filter="complete-profile" onclick="toggleQuickFilter(this)">
+                        Complete Profiles
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm filter-tag" data-filter="available" onclick="toggleQuickFilter(this)">
+                        Available for Work
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="text-muted">Showing <span id="results-count">0</span> candidates</span>
+        <span class="text-muted" id="filter-summary"></span>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" onclick="selectAll()">
+            <i class="bi bi-check-square me-1"></i>Select All
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+            <i class="bi bi-square me-1"></i>Clear Selection
+        </button>
+    </div>
+</div>
+
+<!-- Candidates Grid -->
+<div class="row g-4" id="candidates-container">
+    <!-- Candidates will be loaded here -->
+    <div class="col-12 text-center py-5">
+        <div class="loading-spinner mb-3"></div>
+        <p class="text-muted">Loading candidates...</p>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    <nav>
+        <ul class="pagination" id="pagination-container">
+            <!-- Pagination will be generated here -->
+        </ul>
+    </nav>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Selected <span id="selected-count">0</span> candidates</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="bulkInviteSelected()">
+                        <i class="bi bi-envelope me-2"></i>Send Job Invitations
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="addToShortlist()">
+                        <i class="bi bi-star me-2"></i>Add to Shortlist
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="exportSelected()">
+                        <i class="bi bi-download me-2"></i>Export Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.candidate-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    background: var(--white);
+    height: 100%;
+}
+
+.candidate-card:hover {
+    border-color: var(--primary-blue);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    transform: translateY(-2px);
+}
+
+.candidate-card.selected {
+    border-color: var(--primary-blue);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.candidate-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.candidate-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.candidate-branch {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.candidate-stats {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: var(--light-grey);
+    border-radius: 8px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--primary-blue);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.candidate-skills {
+    margin: 1rem 0;
+}
+
+.skill-badge {
+    display: inline-block;
+    background: var(--light-grey);
+    color: var(--text-primary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin: 0.2rem 0.2rem 0.2rem 0;
+}
+
+.candidate-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.filter-tag.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+.selected-skill {
+    display: inline-flex;
+    align-items: center;
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    gap: 0.5rem;
+}
+
+.selected-skill .remove-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+.candidate-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.match-score {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--success-green);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Candidates browsing JavaScript
+let currentPage = 1;
+let totalPages = 1;
+let selectedCandidates = new Set();
+let skillFilters = [];
+let quickFilters = new Set();
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadCandidates();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Search input with debounce
+    document.getElementById('search-input').addEventListener('input', 
+        CP.utils.debounce(searchCandidates, 500)
+    );
+    
+    // Skills filter input
+    document.getElementById('skills-filter-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkillFilter();
+        }
+    });
+}
+
+async function loadCandidates(page = 1) {
+    try {
+        currentPage = page;
+        const container = document.getElementById('candidates-container');
+        
+        // Show loading
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="loading-spinner mb-3"></div>
+                <p class="text-muted">Loading candidates...</p>
+            </div>
+        `;
+        
+        // Build query parameters
+        const params = new URLSearchParams({
+            page: page,
+            per_page: 12
+        });
+        
+        // Add filters
+        const branch = document.getElementById('branch-filter').value;
+        const year = document.getElementById('year-filter').value;
+        const cgpa = document.getElementById('cgpa-filter').value;
+        const sortBy = document.getElementById('sort-by').value;
+        const search = document.getElementById('search-input').value;
+        
+        if (branch) params.append('major', branch);
+        if (year) params.append('year', year);
+        if (cgpa) params.append('min_cgpa', cgpa);
+        if (sortBy) params.append('sort', sortBy);
+        if (search) params.append('search', search);
+        
+        // Add skill filters
+        skillFilters.forEach(skill => params.append('skills', skill));
+        
+        // Add quick filters
+        if (quickFilters.has('high-cgpa')) params.append('min_cgpa', '8.5');
+        if (quickFilters.has('final-year')) params.append('year', '4th Year');
+        if (quickFilters.has('complete-profile')) params.append('min_completion', '80');
+        if (quickFilters.has('available')) params.append('available', 'true');
+        
+        const response = await CP.api.get(`/employer/candidates?${params}`);
+        
+        if (response.candidates) {
+            renderCandidates(response.candidates);
+            updatePagination(response);
+            updateResultsSummary(response);
+        } else {
+            showNoCandidates();
+        }
+        
+    } catch (error) {
+        console.error('Error loading candidates:', error);
+        showErrorState();
+    }
+}
+
+function renderCandidates(candidates) {
+    const container = document.getElementById('candidates-container');
+    
+    if (candidates.length === 0) {
+        showNoCandidates();
+        return;
+    }
+    
+    container.innerHTML = candidates.map(candidate => 
+        `<div class="col-lg-4 col-md-6">
+            <div class="candidate-card ${selectedCandidates.has(candidate.id) ? 'selected' : ''}" 
+                 data-candidate-id="${candidate.id}">
+                <div class="position-relative">
+                    <div class="match-score">95% Match</div>
+                    <div class="candidate-checkbox">
+                        <input type="checkbox" class="form-check-input" 
+                               ${selectedCandidates.has(candidate.id) ? 'checked' : ''}
+                               onchange="toggleCandidateSelection(${candidate.id}, this.checked)">
+                    </div>
+                    
+                    <div class="candidate-avatar mx-auto">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="candidate-name">${candidate.first_name} ${candidate.last_name}</div>
+                        <div class="candidate-branch">${candidate.academic_records?.branch || 'Not specified'}</div>
+                    </div>
+                    
+                    <div class="candidate-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">${candidate.academic_records?.cgpa || 'N/A'}</span>
+                            <span class="stat-label">CGPA</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${candidate.academic_records?.year || 'N/A'}</span>
+                            <span class="stat-label">Year</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${candidate.profile_completion_score || 0}%</span>
+                            <span class="stat-label">Complete</span>
+                        </div>
+                    </div>
+                    
+                    <div class="candidate-skills">
+                        ${(candidate.technical_skills || []).slice(0, 4).map(skill => 
+                            `<span class="skill-badge">${skill}</span>`
+                        ).join('')}
+                        ${(candidate.technical_skills || []).length > 4 ? 
+                            `<span class="skill-badge">+${(candidate.technical_skills || []).length - 4} more</span>` : ''}
+                    </div>
+                    
+                    <div class="candidate-actions">
+                        <button class="btn btn-primary btn-sm flex-fill" onclick="viewProfile(${candidate.id})">
+                            <i class="bi bi-eye me-1"></i>View Profile
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="inviteCandidate(${candidate.id})">
+                            <i class="bi bi-envelope"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="shortlistCandidate(${candidate.id})">
+                            <i class="bi bi-star"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    ).join('');
+}
+
+function showNoCandidates() {
+    const container = document.getElementById('candidates-container');
+    container.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">No candidates found</h4>
+            <p class="text-muted">Try adjusting your search criteria or filters</p>
+            <button class="btn btn-primary" onclick="clearAllFilters()">Clear All Filters</button>
+        </div>
+    `;
+}
+
+function showErrorState() {
+    const container = document.getElementById('candidates-container');
+    container.innerHTML = `
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">Failed to load candidates</h4>
+            <p class="text-muted">Please try again later</p>
+            <button class="btn btn-primary" onclick="loadCandidates()">Retry</button>
+        </div>
+    `;
+}
+
+function updatePagination(response) {
+    const container = document.getElementById('pagination-container');
+    totalPages = Math.ceil(response.total / response.per_page);
+    
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="loadCandidates(${currentPage - 1})">Previous</a>
+        </li>
+    `;
+    
+    // Page numbers
+    for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+        paginationHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="loadCandidates(${i})">${i}</a>
+            </li>
+        `;
+    }
+    
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="loadCandidates(${currentPage + 1})">Next</a>
+        </li>
+    `;
+    
+    container.innerHTML = paginationHTML;
+}
+
+function updateResultsSummary(response) {
+    document.getElementById('results-count').textContent = response.total;
+    
+    // Update filter summary
+    const activeFilters = [];
+    if (document.getElementById('branch-filter').value) activeFilters.push('Branch');
+    if (document.getElementById('year-filter').value) activeFilters.push('Year');
+    if (document.getElementById('cgpa-filter').value) activeFilters.push('CGPA');
+    if (skillFilters.length > 0) activeFilters.push('Skills');
+    if (quickFilters.size > 0) activeFilters.push('Quick Filters');
+    
+    const summary = activeFilters.length > 0 ? ` (filtered by ${activeFilters.join(', ')})` : '';
+    document.getElementById('filter-summary').textContent = summary;
+}
+
+function searchCandidates() {
+    loadCandidates(1);
+}
+
+function applyFilters() {
+    loadCandidates(1);
+}
+
+function addSkillFilter() {
+    const input = document.getElementById('skills-filter-input');
+    const skill = input.value.trim();
+    
+    if (!skill || skillFilters.includes(skill)) return;
+    
+    skillFilters.push(skill);
+    input.value = '';
+    renderSkillFilters();
+    loadCandidates(1);
+}
+
+function removeSkillFilter(skill) {
+    skillFilters = skillFilters.filter(s => s !== skill);
+    renderSkillFilters();
+    loadCandidates(1);
+}
+
+function renderSkillFilters() {
+    const container = document.getElementById('selected-skills-container');
+    container.innerHTML = skillFilters.map(skill => 
+        `<span class="selected-skill">
+            ${skill}
+            <button type="button" class="remove-btn" onclick="removeSkillFilter('${skill}')">
+                <i class="bi bi-x"></i>
+            </button>
+        </span>`
+    ).join('');
+}
+
+function toggleQuickFilter(button) {
+    const filter = button.dataset.filter;
+    
+    if (quickFilters.has(filter)) {
+        quickFilters.delete(filter);
+        button.classList.remove('active');
+    } else {
+        quickFilters.add(filter);
+        button.classList.add('active');
+    }
+    
+    loadCandidates(1);
+}
+
+function clearAllFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('branch-filter').value = '';
+    document.getElementById('year-filter').value = '';
+    document.getElementById('cgpa-filter').value = '';
+    document.getElementById('sort-by').value = 'relevance';
+    
+    skillFilters = [];
+    quickFilters.clear();
+    
+    renderSkillFilters();
+    document.querySelectorAll('.filter-tag').forEach(btn => btn.classList.remove('active'));
+    
+    loadCandidates(1);
+}
+
+function toggleCandidateSelection(candidateId, selected) {
+    if (selected) {
+        selectedCandidates.add(candidateId);
+    } else {
+        selectedCandidates.delete(candidateId);
+    }
+    
+    // Update card appearance
+    const card = document.querySelector(`[data-candidate-id="${candidateId}"]`);
+    if (card) {
+        card.classList.toggle('selected', selected);
+    }
+    
+    updateBulkActionsButton();
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.candidate-card input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        const candidateId = parseInt(checkbox.closest('.candidate-card').dataset.candidateId);
+        selectedCandidates.add(candidateId);
+        checkbox.closest('.candidate-card').classList.add('selected');
+    });
+    updateBulkActionsButton();
+}
+
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.candidate-card input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.candidate-card').classList.remove('selected');
+    });
+    selectedCandidates.clear();
+    updateBulkActionsButton();
+}
+
+function updateBulkActionsButton() {
+    document.getElementById('selected-count').textContent = selectedCandidates.size;
+}
+
+function viewProfile(candidateId) {
+    window.open(`/student/profile/${candidateId}`, '_blank');
+}
+
+async function inviteCandidate(candidateId) {
+    try {
+        CP.utils.showToast('Invitation sent successfully', 'success');
+    } catch (error) {
+        CP.utils.showToast('Failed to send invitation', 'error');
+    }
+}
+
+async function shortlistCandidate(candidateId) {
+    try {
+        CP.utils.showToast('Candidate added to shortlist', 'success');
+    } catch (error) {
+        CP.utils.showToast('Failed to shortlist candidate', 'error');
+    }
+}
+
+function bulkInvite() {
+    if (selectedCandidates.size === 0) {
+        CP.utils.showToast('Please select candidates first', 'warning');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('bulkActionsModal'));
+    modal.show();
+}
+
+function refreshCandidates() {
+    loadCandidates(currentPage);
+}
+
+function exportCandidates() {
+    CP.utils.showToast('Export feature coming soon!', 'info');
+}
+
+async function bulkInviteSelected() {
+    try {
+        CP.utils.showToast(`Invitations sent to ${selectedCandidates.size} candidates`, 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal'));
+        modal.hide();
+        clearSelection();
+    } catch (error) {
+        CP.utils.showToast('Failed to send bulk invitations', 'error');
+    }
+}
+
+function addToShortlist() {
+    try {
+        CP.utils.showToast(`${selectedCandidates.size} candidates added to shortlist`, 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal'));
+        modal.hide();
+        clearSelection();
+    } catch (error) {
+        CP.utils.showToast('Failed to add to shortlist', 'error');
+    }
+}
+
+function exportSelected() {
+    CP.utils.showToast('Export feature coming soon!', 'info');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,640 @@
+{% extends "layouts/employer_layout.html" %}
+
+{% block title %}Post New Job - AI Career Platform{% endblock %}
+
+{% block employer_content %}
+<!-- Job Posting Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Post New Job</h2>
+        <p class="text-muted mb-0">Create a job posting to find the best candidates</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('employer.jobs') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Jobs
+        </a>
+        <button class="btn btn-secondary" onclick="saveDraft()" id="draft-btn">
+            <i class="bi bi-file-earmark me-1"></i>Save Draft
+        </button>
+        <button class="btn btn-success" onclick="publishJob()" id="publish-btn">
+            <i class="bi bi-check-circle me-1"></i>Publish Job
+        </button>
+    </div>
+</div>
+
+<!-- Job Posting Form -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <form id="job-posting-form">
+            <!-- Basic Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="job_title" class="form-label">Job Title *</label>
+                            <input type="text" class="form-control" id="job_title" name="title" required 
+                                   placeholder="e.g. Senior Software Developer">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   placeholder="e.g. Bhubaneswar, Odisha">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="experience_level" class="form-label">Experience Level *</label>
+                            <select class="form-select" id="experience_level" name="experience_level" required>
+                                <option value="">Select Experience Level</option>
+                                <option value="Entry Level">Entry Level (0-1 years)</option>
+                                <option value="Junior">Junior (1-3 years)</option>
+                                <option value="Mid Level">Mid Level (3-5 years)</option>
+                                <option value="Senior">Senior (5-8 years)</option>
+                                <option value="Lead">Lead (8+ years)</option>
+                                <option value="Internship">Internship</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="employment_type" class="form-label">Employment Type</label>
+                            <select class="form-select" id="employment_type" name="employment_type">
+                                <option value="">Select Type</option>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="application_deadline" class="form-label">Application Deadline</label>
+                            <input type="date" class="form-control" id="application_deadline" name="application_deadline">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Job Description -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Job Description</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="job_description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="job_description" name="description" rows="8" required
+                                  placeholder="Describe the role, responsibilities, and what makes this position exciting..."></textarea>
+                        <div class="invalid-feedback"></div>
+                        <small class="text-muted">Provide a detailed description to attract the right candidates</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="responsibilities" class="form-label">Key Responsibilities</label>
+                        <textarea class="form-control" id="responsibilities" name="responsibilities" rows="4"
+                                  placeholder="• Develop and maintain web applications&#10;• Collaborate with cross-functional teams&#10;• Write clean, maintainable code"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Requirements & Skills -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Requirements & Skills</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Required Skills *</label>
+                            <div class="skills-input-container">
+                                <input type="text" class="form-control" id="required-skill-input" 
+                                       placeholder="Add a required skill...">
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSkill('required')">
+                                    <i class="bi bi-plus"></i> Add Skill
+                                </button>
+                            </div>
+                            <div class="skills-container mt-3" id="required-skills-container">
+                                <!-- Required skills will be displayed here -->
+                            </div>
+                            <small class="text-muted">Add skills that are essential for this role</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Preferred Skills</label>
+                            <div class="skills-input-container">
+                                <input type="text" class="form-control" id="preferred-skill-input" 
+                                       placeholder="Add a preferred skill...">
+                                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addSkill('preferred')">
+                                    <i class="bi bi-plus"></i> Add Skill
+                                </button>
+                            </div>
+                            <div class="skills-container mt-3" id="preferred-skills-container">
+                                <!-- Preferred skills will be displayed here -->
+                            </div>
+                            <small class="text-muted">Add skills that would be nice to have</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Skill Suggestions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">Popular Skills</h6>
+                            <div class="skill-suggestions">
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'Python')">Python</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'Java')">Java</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'JavaScript')">JavaScript</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'React')">React</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'Node.js')">Node.js</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'SQL')">SQL</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'Git')">Git</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('required', 'AWS')">AWS</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('preferred', 'Docker')">Docker</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('preferred', 'Kubernetes')">Kubernetes</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('preferred', 'Machine Learning')">Machine Learning</span>
+                                <span class="skill-suggestion" onclick="addSuggestedSkill('preferred', 'DevOps')">DevOps</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="education_requirements" class="form-label">Education Requirements</label>
+                            <select class="form-select" id="education_requirements" name="education_requirements">
+                                <option value="">Select Education Level</option>
+                                <option value="High School">High School</option>
+                                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                <option value="Master's Degree">Master's Degree</option>
+                                <option value="PhD">PhD</option>
+                                <option value="Any Degree">Any Degree</option>
+                                <option value="No Degree Required">No Degree Required</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="certifications" class="form-label">Preferred Certifications</label>
+                            <input type="text" class="form-control" id="certifications" name="certifications"
+                                   placeholder="e.g. AWS Certified, Google Cloud, etc.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Compensation & Benefits -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-currency-rupee me-2"></i>Compensation & Benefits</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="salary_min" class="form-label">Minimum Salary (₹)</label>
+                            <input type="number" class="form-control" id="salary_min" name="salary_min" 
+                                   placeholder="e.g. 300000">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="salary_max" class="form-label">Maximum Salary (₹)</label>
+                            <input type="number" class="form-control" id="salary_max" name="salary_max" 
+                                   placeholder="e.g. 500000">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="salary_type" class="form-label">Salary Type</label>
+                            <select class="form-select" id="salary_type" name="salary_type">
+                                <option value="Annual">Annual</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Hourly">Hourly</option>
+                                <option value="Project-based">Project-based</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="currency" class="form-label">Currency</label>
+                            <select class="form-select" id="currency" name="currency">
+                                <option value="INR">INR (₹)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="benefits" class="form-label">Benefits & Perks</label>
+                            <textarea class="form-control" id="benefits" name="benefits" rows="3"
+                                      placeholder="• Health insurance&#10;• Flexible working hours&#10;• Professional development opportunities"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Job Preview -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Job Preview</h6>
+            </div>
+            <div class="card-body">
+                <div id="job-preview">
+                    <h6 id="preview-title" class="text-muted">Job Title</h6>
+                    <p id="preview-location" class="text-muted mb-2">Location</p>
+                    <p id="preview-description" class="text-muted">Job description will appear here as you type...</p>
+                    <div id="preview-skills" class="mb-3">
+                        <!-- Skills preview -->
+                    </div>
+                    <div id="preview-salary" class="text-muted">
+                        <!-- Salary preview -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Suggestions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>AI Suggestions</h6>
+            </div>
+            <div class="card-body">
+                <div id="ai-suggestions">
+                    <div class="suggestion-item mb-3">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <small>Add specific technical skills to attract qualified candidates</small>
+                    </div>
+                    <div class="suggestion-item mb-3">
+                        <i class="bi bi-info-circle text-info me-2"></i>
+                        <small>Include salary range to increase application rates by 30%</small>
+                    </div>
+                    <div class="suggestion-item">
+                        <i class="bi bi-star text-warning me-2"></i>
+                        <small>Mention growth opportunities to attract ambitious candidates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Posting Tips -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Posting Tips</h6>
+            </div>
+            <div class="card-body">
+                <div class="tip-item mb-3">
+                    <i class="bi bi-check-circle text-success me-2"></i>
+                    <small>Use clear, specific job titles for better visibility</small>
+                </div>
+                <div class="tip-item mb-3">
+                    <i class="bi bi-check-circle text-success me-2"></i>
+                    <small>Include 3-5 key responsibilities in the description</small>
+                </div>
+                <div class="tip-item mb-3">
+                    <i class="bi bi-check-circle text-success me-2"></i>
+                    <small>List both required and preferred skills</small>
+                </div>
+                <div class="tip-item">
+                    <i class="bi bi-check-circle text-success me-2"></i>
+                    <small>Set realistic application deadlines</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.skills-container {
+    min-height: 60px;
+}
+
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    gap: 0.5rem;
+}
+
+.skill-tag.preferred {
+    background: var(--secondary-grey);
+}
+
+.skill-tag .remove-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+.skill-suggestion {
+    display: inline-block;
+    background: var(--light-grey);
+    color: var(--text-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.skill-suggestion:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.suggestion-item, .tip-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.suggestion-item:last-child, .tip-item:last-child {
+    margin-bottom: 0;
+}
+
+#job-preview {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--light-grey);
+}
+
+.preview-skill {
+    display: inline-block;
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin: 0.2rem 0.2rem 0.2rem 0;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Job posting JavaScript
+let jobData = {
+    required_skills: [],
+    preferred_qualifications: []
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupFormListeners();
+    updatePreview();
+});
+
+function setupFormListeners() {
+    // Real-time preview updates
+    const form = document.getElementById('job-posting-form');
+    form.addEventListener('input', updatePreview);
+    
+    // Skill input listeners
+    document.getElementById('required-skill-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkill('required');
+        }
+    });
+    
+    document.getElementById('preferred-skill-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkill('preferred');
+        }
+    });
+}
+
+function updatePreview() {
+    // Update job title
+    const title = document.getElementById('job_title').value || 'Job Title';
+    document.getElementById('preview-title').textContent = title;
+    
+    // Update location
+    const location = document.getElementById('location').value || 'Location';
+    document.getElementById('preview-location').textContent = location;
+    
+    // Update description
+    const description = document.getElementById('job_description').value || 'Job description will appear here as you type...';
+    document.getElementById('preview-description').textContent = description.substring(0, 150) + (description.length > 150 ? '...' : '');
+    
+    // Update skills preview
+    updateSkillsPreview();
+    
+    // Update salary preview
+    updateSalaryPreview();
+}
+
+function updateSkillsPreview() {
+    const container = document.getElementById('preview-skills');
+    const allSkills = [...jobData.required_skills, ...jobData.preferred_qualifications];
+    
+    if (allSkills.length > 0) {
+        container.innerHTML = allSkills.slice(0, 5).map(skill => 
+            `<span class="preview-skill">${skill}</span>`
+        ).join('') + (allSkills.length > 5 ? '<span class="preview-skill">+' + (allSkills.length - 5) + ' more</span>' : '');
+    } else {
+        container.innerHTML = '<small class="text-muted">No skills added yet</small>';
+    }
+}
+
+function updateSalaryPreview() {
+    const container = document.getElementById('preview-salary');
+    const minSalary = document.getElementById('salary_min').value;
+    const maxSalary = document.getElementById('salary_max').value;
+    const salaryType = document.getElementById('salary_type').value || 'Annual';
+    
+    if (minSalary || maxSalary) {
+        const salaryText = minSalary && maxSalary 
+            ? `₹${parseInt(minSalary).toLocaleString()} - ₹${parseInt(maxSalary).toLocaleString()}`
+            : minSalary 
+                ? `₹${parseInt(minSalary).toLocaleString()}+`
+                : `Up to ₹${parseInt(maxSalary).toLocaleString()}`;
+        container.innerHTML = `<strong>${salaryText}</strong> <small class="text-muted">${salaryType}</small>`;
+    } else {
+        container.innerHTML = '<small class="text-muted">Salary not specified</small>';
+    }
+}
+
+function addSkill(type) {
+    const input = document.getElementById(`${type}-skill-input`);
+    const skill = input.value.trim();
+    
+    if (!skill) return;
+    
+    const skillArray = type === 'required' ? jobData.required_skills : jobData.preferred_qualifications;
+    
+    if (skillArray.includes(skill)) {
+        CP.utils.showToast('Skill already added', 'warning');
+        return;
+    }
+    
+    skillArray.push(skill);
+    input.value = '';
+    renderSkills(type);
+    updatePreview();
+}
+
+function addSuggestedSkill(type, skill) {
+    const skillArray = type === 'required' ? jobData.required_skills : jobData.preferred_qualifications;
+    
+    if (skillArray.includes(skill)) {
+        CP.utils.showToast('Skill already added', 'warning');
+        return;
+    }
+    
+    skillArray.push(skill);
+    renderSkills(type);
+    updatePreview();
+}
+
+function removeSkill(type, index) {
+    const skillArray = type === 'required' ? jobData.required_skills : jobData.preferred_qualifications;
+    skillArray.splice(index, 1);
+    renderSkills(type);
+    updatePreview();
+}
+
+function renderSkills(type) {
+    const container = document.getElementById(`${type}-skills-container`);
+    const skillArray = type === 'required' ? jobData.required_skills : jobData.preferred_qualifications;
+    const skillClass = type === 'required' ? 'skill-tag' : 'skill-tag preferred';
+    
+    container.innerHTML = skillArray.map((skill, index) => 
+        `<span class="${skillClass}">
+            ${skill}
+            <button type="button" class="remove-btn" onclick="removeSkill('${type}', ${index})">
+                <i class="bi bi-x"></i>
+            </button>
+        </span>`
+    ).join('');
+}
+
+async function saveDraft() {
+    try {
+        const button = document.getElementById('draft-btn');
+        const originalText = button.innerHTML;
+        CP.utils.showLoading(button);
+        
+        const jobData = collectFormData();
+        jobData.status = 'draft';
+        
+        const response = await CP.api.post('/employer/jobs', jobData);
+        
+        if (response.success || response.message) {
+            CP.utils.showToast('Job saved as draft', 'success');
+            setTimeout(() => {
+                window.location.href = '/employer/jobs';
+            }, 1500);
+        }
+        
+        CP.utils.hideLoading(button, originalText);
+    } catch (error) {
+        console.error('Error saving draft:', error);
+        CP.utils.showToast('Failed to save draft', 'error');
+    }
+}
+
+async function publishJob() {
+    try {
+        // Validate form first
+        if (!validateForm()) {
+            return;
+        }
+        
+        const button = document.getElementById('publish-btn');
+        const originalText = button.innerHTML;
+        CP.utils.showLoading(button);
+        
+        const jobData = collectFormData();
+        jobData.status = 'active';
+        
+        const response = await CP.api.post('/employer/jobs', jobData);
+        
+        if (response.success || response.message) {
+            CP.utils.showToast('Job published successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/employer/jobs';
+            }, 1500);
+        }
+        
+        CP.utils.hideLoading(button, originalText);
+    } catch (error) {
+        console.error('Error publishing job:', error);
+        CP.utils.showToast('Failed to publish job', 'error');
+    }
+}
+
+function collectFormData() {
+    const formData = new FormData(document.getElementById('job-posting-form'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Add skills
+    data.required_skills = jobData.required_skills;
+    data.preferred_qualifications = jobData.preferred_qualifications;
+    
+    // Format salary range
+    if (data.salary_min || data.salary_max) {
+        data.salary_range = {
+            min: data.salary_min ? parseInt(data.salary_min) : null,
+            max: data.salary_max ? parseInt(data.salary_max) : null,
+            type: data.salary_type || 'Annual',
+            currency: data.currency || 'INR'
+        };
+    }
+    
+    // Remove individual salary fields
+    delete data.salary_min;
+    delete data.salary_max;
+    delete data.salary_type;
+    delete data.currency;
+    
+    return data;
+}
+
+function validateForm() {
+    const form = document.getElementById('job-posting-form');
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!CP.validation.validateField(field)) {
+            isValid = false;
+        }
+    });
+    
+    // Validate required skills
+    if (jobData.required_skills.length === 0) {
+        CP.utils.showToast('Please add at least one required skill', 'warning');
+        isValid = false;
+    }
+    
+    // Validate salary range
+    const minSalary = document.getElementById('salary_min').value;
+    const maxSalary = document.getElementById('salary_max').value;
+    
+    if (minSalary && maxSalary && parseInt(minSalary) > parseInt(maxSalary)) {
+        CP.utils.showToast('Minimum salary cannot be greater than maximum salary', 'warning');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        CP.utils.showToast('Please fix the errors in the form', 'error');
+    }
+    
+    return isValid;
+}
+</script>
+{% endblock %}

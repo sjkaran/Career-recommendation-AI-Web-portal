@@ -1,0 +1,885 @@
+{% extends "layouts/student_layout.html" %}
+
+{% block title %}Edit Profile - AI Career Platform{% endblock %}
+
+{% block student_content %}
+<!-- Profile Edit Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Edit Your Profile</h2>
+        <p class="text-muted mb-0">Complete your profile to get better job matches and recommendations</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('student.profile') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Profile
+        </a>
+        <button class="btn btn-success" onclick="saveProfile()" id="save-btn">
+            <i class="bi bi-check me-1"></i>Save Changes
+        </button>
+    </div>
+</div>
+
+<!-- Progress Indicator -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <div class="step-indicator me-4">
+                        <div class="step-item active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Personal</div>
+                        </div>
+                        <div class="step-item" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Academic</div>
+                        </div>
+                        <div class="step-item" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Skills</div>
+                        </div>
+                        <div class="step-item" data-step="4">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Activities</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="completion-indicator">
+                    <span class="text-muted">Completion: </span>
+                    <span class="fw-bold text-primary" id="completion-percentage">0%</span>
+                </div>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-primary" id="completion-bar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Form -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <form id="profile-form">
+            <!-- Step 1: Personal Information -->
+            <div class="step-content active" id="step-1">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" readonly>
+                                <small class="text-muted">Email cannot be changed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Academic Records -->
+            <div class="step-content" id="step-2">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-mortarboard me-2"></i>Academic Records</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cgpa" class="form-label">CGPA *</label>
+                                <input type="number" class="form-control" id="cgpa" name="cgpa" min="0" max="10" step="0.01" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="branch" class="form-label">Branch *</label>
+                                <select class="form-select" id="branch" name="branch" required>
+                                    <option value="">Select Branch</option>
+                                    <option value="Computer Science Engineering">Computer Science Engineering</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Electronics & Communication">Electronics & Communication</option>
+                                    <option value="Electrical Engineering">Electrical Engineering</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                    <option value="Civil Engineering">Civil Engineering</option>
+                                    <option value="Chemical Engineering">Chemical Engineering</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="year" class="form-label">Current Year *</label>
+                                <select class="form-select" id="year" name="year" required>
+                                    <option value="">Select Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                    <option value="Graduate">Graduate</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="semester" class="form-label">Current Semester</label>
+                                <select class="form-select" id="semester" name="semester">
+                                    <option value="">Select Semester</option>
+                                    <option value="1st Semester">1st Semester</option>
+                                    <option value="2nd Semester">2nd Semester</option>
+                                    <option value="3rd Semester">3rd Semester</option>
+                                    <option value="4th Semester">4th Semester</option>
+                                    <option value="5th Semester">5th Semester</option>
+                                    <option value="6th Semester">6th Semester</option>
+                                    <option value="7th Semester">7th Semester</option>
+                                    <option value="8th Semester">8th Semester</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="projects" class="form-label">Projects</label>
+                                <textarea class="form-control" id="projects" name="projects" rows="3" placeholder="Describe your academic projects..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Skills -->
+            <div class="step-content" id="step-3">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Skills</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Technical Skills *</label>
+                                <div class="skills-input-container">
+                                    <input type="text" class="form-control" id="technical-skill-input" placeholder="Add a technical skill...">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSkill('technical')">
+                                        <i class="bi bi-plus"></i> Add Skill
+                                    </button>
+                                </div>
+                                <div class="skills-container mt-3" id="technical-skills-container">
+                                    <!-- Technical skills will be displayed here -->
+                                </div>
+                                <small class="text-muted">Add at least 3 technical skills</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Soft Skills *</label>
+                                <div class="skills-input-container">
+                                    <input type="text" class="form-control" id="soft-skill-input" placeholder="Add a soft skill...">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSkill('soft')">
+                                        <i class="bi bi-plus"></i> Add Skill
+                                    </button>
+                                </div>
+                                <div class="skills-container mt-3" id="soft-skills-container">
+                                    <!-- Soft skills will be displayed here -->
+                                </div>
+                                <small class="text-muted">Add at least 3 soft skills</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Skill Suggestions -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Popular Technical Skills</h6>
+                                <div class="skill-suggestions">
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'Python')">Python</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'Java')">Java</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'JavaScript')">JavaScript</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'React')">React</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'Node.js')">Node.js</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'SQL')">SQL</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'Git')">Git</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('technical', 'HTML/CSS')">HTML/CSS</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Popular Soft Skills</h6>
+                                <div class="skill-suggestions">
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Communication')">Communication</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Leadership')">Leadership</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Teamwork')">Teamwork</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Problem Solving')">Problem Solving</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Time Management')">Time Management</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Adaptability')">Adaptability</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Critical Thinking')">Critical Thinking</span>
+                                    <span class="skill-suggestion" onclick="addSuggestedSkill('soft', 'Creativity')">Creativity</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Activities & Interests -->
+            <div class="step-content" id="step-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Activities & Interests</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Co-curricular Activities</label>
+                                <div class="activity-input-container">
+                                    <input type="text" class="form-control" id="co-curricular-input" placeholder="Add co-curricular activity...">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addActivity('co-curricular')">
+                                        <i class="bi bi-plus"></i> Add Activity
+                                    </button>
+                                </div>
+                                <div class="activities-container mt-3" id="co-curricular-container">
+                                    <!-- Co-curricular activities will be displayed here -->
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Extra-curricular Activities</label>
+                                <div class="activity-input-container">
+                                    <input type="text" class="form-control" id="extra-curricular-input" placeholder="Add extra-curricular activity...">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addActivity('extra-curricular')">
+                                        <i class="bi bi-plus"></i> Add Activity
+                                    </button>
+                                </div>
+                                <div class="activities-container mt-3" id="extra-curricular-container">
+                                    <!-- Extra-curricular activities will be displayed here -->
+                                </div>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <label class="form-label">Career Interests</label>
+                                <div class="activity-input-container">
+                                    <input type="text" class="form-control" id="career-interests-input" placeholder="Add career interest...">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addActivity('career-interests')">
+                                        <i class="bi bi-plus"></i> Add Interest
+                                    </button>
+                                </div>
+                                <div class="activities-container mt-3" id="career-interests-container">
+                                    <!-- Career interests will be displayed here -->
+                                </div>
+                                
+                                <!-- Career Interest Suggestions -->
+                                <div class="mt-3">
+                                    <h6 class="text-muted mb-2">Popular Career Domains</h6>
+                                    <div class="skill-suggestions">
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Software Development')">Software Development</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Data Science')">Data Science</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Web Development')">Web Development</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Mobile Development')">Mobile Development</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Machine Learning')">Machine Learning</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'Cybersecurity')">Cybersecurity</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'DevOps')">DevOps</span>
+                                        <span class="skill-suggestion" onclick="addSuggestedActivity('career-interests', 'UI/UX Design')">UI/UX Design</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Navigation -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-list me-2"></i>Navigation</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="goToStep(1)" id="nav-step-1">
+                        <i class="bi bi-person me-2"></i>Personal Info
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="goToStep(2)" id="nav-step-2">
+                        <i class="bi bi-mortarboard me-2"></i>Academic Records
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="goToStep(3)" id="nav-step-3">
+                        <i class="bi bi-gear me-2"></i>Skills
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="goToStep(4)" id="nav-step-4">
+                        <i class="bi bi-trophy me-2"></i>Activities
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-secondary flex-fill" onclick="previousStep()" id="prev-btn" disabled>
+                        <i class="bi bi-arrow-left me-1"></i>Previous
+                    </button>
+                    <button class="btn btn-primary flex-fill" onclick="nextStep()" id="next-btn">
+                        Next<i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Tips</h6>
+            </div>
+            <div class="card-body">
+                <div id="step-tips">
+                    <!-- Tips will be updated based on current step -->
+                    <div class="tip-item">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <small>Complete all required fields to improve your profile score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 100%;
+    width: 2rem;
+    height: 2px;
+    background: var(--border-color);
+    z-index: -1;
+}
+
+.step-item.active:not(:last-child)::after,
+.step-item.completed:not(:last-child)::after {
+    background: var(--primary-blue);
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.step-item.active .step-number {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.step-item.completed .step-number {
+    background: var(--success-green);
+    color: white;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.step-item.active .step-label {
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.step-content {
+    display: none;
+}
+
+.step-content.active {
+    display: block;
+}
+
+.skills-container, .activities-container {
+    min-height: 60px;
+}
+
+.skill-tag, .activity-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    gap: 0.5rem;
+}
+
+.skill-tag .remove-btn, .activity-tag .remove-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+.skill-suggestion {
+    display: inline-block;
+    background: var(--light-grey);
+    color: var(--text-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.skill-suggestion:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.tip-item:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .step-indicator {
+        gap: 1rem;
+    }
+    
+    .step-item:not(:last-child)::after {
+        width: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Profile editing JavaScript
+let currentStep = 1;
+let profileData = {
+    technical_skills: [],
+    soft_skills: [],
+    co_curricular: [],
+    extra_curricular: [],
+    career_interests: []
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadExistingProfile();
+    updateStepNavigation();
+    updateTips();
+});
+
+async function loadExistingProfile() {
+    try {
+        const response = await CP.api.get('/student/profile');
+        
+        if (response.success && response.profile) {
+            populateForm(response.profile);
+        }
+        
+        updateCompletion();
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+function populateForm(profile) {
+    // Personal Information
+    if (profile.first_name) document.getElementById('first_name').value = profile.first_name;
+    if (profile.last_name) document.getElementById('last_name').value = profile.last_name;
+    if (profile.phone) document.getElementById('phone').value = profile.phone;
+    if (profile.email) document.getElementById('email').value = profile.email;
+    
+    // Academic Records
+    if (profile.academic_records) {
+        const records = profile.academic_records;
+        if (records.cgpa) document.getElementById('cgpa').value = records.cgpa;
+        if (records.branch) document.getElementById('branch').value = records.branch;
+        if (records.year) document.getElementById('year').value = records.year;
+        if (records.semester) document.getElementById('semester').value = records.semester;
+        if (records.projects) document.getElementById('projects').value = records.projects;
+    }
+    
+    // Skills
+    if (profile.technical_skills) {
+        profileData.technical_skills = [...profile.technical_skills];
+        renderSkills('technical');
+    }
+    if (profile.soft_skills) {
+        profileData.soft_skills = [...profile.soft_skills];
+        renderSkills('soft');
+    }
+    
+    // Activities
+    if (profile.co_curricular) {
+        profileData.co_curricular = [...profile.co_curricular];
+        renderActivities('co-curricular');
+    }
+    if (profile.extra_curricular) {
+        profileData.extra_curricular = [...profile.extra_curricular];
+        renderActivities('extra-curricular');
+    }
+    if (profile.career_interests) {
+        profileData.career_interests = [...profile.career_interests];
+        renderActivities('career-interests');
+    }
+}
+
+function goToStep(step) {
+    if (step < 1 || step > 4) return;
+    
+    // Hide current step
+    document.querySelector('.step-content.active').classList.remove('active');
+    document.querySelector('.step-item.active').classList.remove('active');
+    
+    // Show new step
+    document.getElementById(`step-${step}`).classList.add('active');
+    document.querySelector(`[data-step="${step}"]`).classList.add('active');
+    
+    currentStep = step;
+    updateStepNavigation();
+    updateTips();
+}
+
+function nextStep() {
+    if (currentStep < 4) {
+        if (validateCurrentStep()) {
+            goToStep(currentStep + 1);
+        }
+    }
+}
+
+function previousStep() {
+    if (currentStep > 1) {
+        goToStep(currentStep - 1);
+    }
+}
+
+function updateStepNavigation() {
+    // Update navigation buttons
+    document.getElementById('prev-btn').disabled = currentStep === 1;
+    document.getElementById('next-btn').textContent = currentStep === 4 ? 'Finish' : 'Next';
+    
+    // Update navigation sidebar
+    for (let i = 1; i <= 4; i++) {
+        const navBtn = document.getElementById(`nav-step-${i}`);
+        if (i === currentStep) {
+            navBtn.classList.remove('btn-outline-primary');
+            navBtn.classList.add('btn-primary');
+        } else {
+            navBtn.classList.remove('btn-primary');
+            navBtn.classList.add('btn-outline-primary');
+        }
+    }
+}
+
+function updateTips() {
+    const tips = {
+        1: [
+            'Complete all required fields to improve your profile score',
+            'Use your real name as it will appear on your resume',
+            'Provide a valid phone number for employer contact'
+        ],
+        2: [
+            'Enter your current CGPA accurately',
+            'Select your correct branch and year',
+            'Describe your academic projects in detail'
+        ],
+        3: [
+            'Add at least 3 technical and 3 soft skills',
+            'Include skills relevant to your career interests',
+            'Use the suggestions to discover new skills'
+        ],
+        4: [
+            'Add activities that showcase your leadership',
+            'Include both academic and non-academic activities',
+            'Specify career domains you are interested in'
+        ]
+    };
+    
+    const tipsContainer = document.getElementById('step-tips');
+    tipsContainer.innerHTML = tips[currentStep].map(tip => 
+        `<div class="tip-item">
+            <i class="bi bi-lightbulb text-warning me-2"></i>
+            <small>${tip}</small>
+        </div>`
+    ).join('');
+}
+
+function validateCurrentStep() {
+    const form = document.getElementById('profile-form');
+    const currentStepElement = document.getElementById(`step-${currentStep}`);
+    const requiredFields = currentStepElement.querySelectorAll('[required]');
+    
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!CP.validation.validateField(field)) {
+            isValid = false;
+        }
+    });
+    
+    // Additional validation for skills in step 3
+    if (currentStep === 3) {
+        if (profileData.technical_skills.length < 3) {
+            CP.utils.showToast('Please add at least 3 technical skills', 'warning');
+            isValid = false;
+        }
+        if (profileData.soft_skills.length < 3) {
+            CP.utils.showToast('Please add at least 3 soft skills', 'warning');
+            isValid = false;
+        }
+    }
+    
+    return isValid;
+}
+
+function addSkill(type) {
+    const input = document.getElementById(`${type}-skill-input`);
+    const skill = input.value.trim();
+    
+    if (!skill) return;
+    
+    if (profileData[`${type}_skills`].includes(skill)) {
+        CP.utils.showToast('Skill already added', 'warning');
+        return;
+    }
+    
+    profileData[`${type}_skills`].push(skill);
+    input.value = '';
+    renderSkills(type);
+    updateCompletion();
+}
+
+function addSuggestedSkill(type, skill) {
+    if (profileData[`${type}_skills`].includes(skill)) {
+        CP.utils.showToast('Skill already added', 'warning');
+        return;
+    }
+    
+    profileData[`${type}_skills`].push(skill);
+    renderSkills(type);
+    updateCompletion();
+}
+
+function removeSkill(type, index) {
+    profileData[`${type}_skills`].splice(index, 1);
+    renderSkills(type);
+    updateCompletion();
+}
+
+function renderSkills(type) {
+    const container = document.getElementById(`${type}-skills-container`);
+    const skills = profileData[`${type}_skills`];
+    
+    container.innerHTML = skills.map((skill, index) => 
+        `<span class="skill-tag">
+            ${skill}
+            <button type="button" class="remove-btn" onclick="removeSkill('${type}', ${index})">
+                <i class="bi bi-x"></i>
+            </button>
+        </span>`
+    ).join('');
+}
+
+function addActivity(type) {
+    const input = document.getElementById(`${type}-input`);
+    const activity = input.value.trim();
+    
+    if (!activity) return;
+    
+    const key = type.replace('-', '_');
+    if (profileData[key].includes(activity)) {
+        CP.utils.showToast('Activity already added', 'warning');
+        return;
+    }
+    
+    profileData[key].push(activity);
+    input.value = '';
+    renderActivities(type);
+    updateCompletion();
+}
+
+function addSuggestedActivity(type, activity) {
+    const key = type.replace('-', '_');
+    if (profileData[key].includes(activity)) {
+        CP.utils.showToast('Interest already added', 'warning');
+        return;
+    }
+    
+    profileData[key].push(activity);
+    renderActivities(type);
+    updateCompletion();
+}
+
+function removeActivity(type, index) {
+    const key = type.replace('-', '_');
+    profileData[key].splice(index, 1);
+    renderActivities(type);
+    updateCompletion();
+}
+
+function renderActivities(type) {
+    const container = document.getElementById(`${type}-container`);
+    const key = type.replace('-', '_');
+    const activities = profileData[key];
+    
+    container.innerHTML = activities.map((activity, index) => 
+        `<span class="activity-tag">
+            ${activity}
+            <button type="button" class="remove-btn" onclick="removeActivity('${type}', ${index})">
+                <i class="bi bi-x"></i>
+            </button>
+        </span>`
+    ).join('');
+}
+
+function updateCompletion() {
+    // Calculate completion percentage
+    let completion = 0;
+    const form = document.getElementById('profile-form');
+    const allFields = form.querySelectorAll('input[required], select[required]');
+    const filledFields = Array.from(allFields).filter(field => field.value.trim() !== '');
+    
+    completion += (filledFields.length / allFields.length) * 60; // 60% for required fields
+    
+    // Add points for skills and activities
+    if (profileData.technical_skills.length >= 3) completion += 10;
+    if (profileData.soft_skills.length >= 3) completion += 10;
+    if (profileData.co_curricular.length > 0) completion += 5;
+    if (profileData.extra_curricular.length > 0) completion += 5;
+    if (profileData.career_interests.length > 0) completion += 10;
+    
+    completion = Math.min(100, Math.round(completion));
+    
+    document.getElementById('completion-percentage').textContent = completion + '%';
+    document.getElementById('completion-bar').style.width = completion + '%';
+}
+
+async function saveProfile() {
+    try {
+        const button = document.getElementById('save-btn');
+        const originalText = button.innerHTML;
+        CP.utils.showLoading(button);
+        
+        // Collect form data
+        const formData = new FormData(document.getElementById('profile-form'));
+        const data = Object.fromEntries(formData.entries());
+        
+        // Add academic records
+        data.academic_records = {
+            cgpa: data.cgpa,
+            branch: data.branch,
+            year: data.year,
+            semester: data.semester,
+            projects: data.projects
+        };
+        
+        // Add skills and activities
+        data.technical_skills = profileData.technical_skills;
+        data.soft_skills = profileData.soft_skills;
+        data.co_curricular = profileData.co_curricular;
+        data.extra_curricular = profileData.extra_curricular;
+        data.career_interests = profileData.career_interests;
+        
+        // Remove individual academic fields
+        delete data.cgpa;
+        delete data.branch;
+        delete data.year;
+        delete data.semester;
+        delete data.projects;
+        
+        // Save profile
+        const response = await CP.api.put('/student/profile', data);
+        
+        if (response.success) {
+            CP.utils.showToast('Profile saved successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/student/profile';
+            }, 1500);
+        }
+        
+        CP.utils.hideLoading(button, originalText);
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        CP.utils.showToast('Failed to save profile', 'error');
+    }
+}
+
+// Add event listeners for Enter key on skill inputs
+document.getElementById('technical-skill-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addSkill('technical');
+    }
+});
+
+document.getElementById('soft-skill-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addSkill('soft');
+    }
+});
+
+document.getElementById('co-curricular-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addActivity('co-curricular');
+    }
+});
+
+document.getElementById('extra-curricular-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addActivity('extra-curricular');
+    }
+});
+
+document.getElementById('career-interests-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addActivity('career-interests');
+    }
+});
+
+// Update completion on form changes
+document.getElementById('profile-form').addEventListener('input', updateCompletion);
+</script>
+{% endblock %}

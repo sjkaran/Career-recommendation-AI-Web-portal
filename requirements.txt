@@ -1,0 +1,34 @@
+# Core Flask dependencies
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# Database
+# Note: SQLite is built into Python, no additional package needed
+
+# Authentication and Security
+PyJWT==2.8.0
+bcrypt==4.0.1
+python-dotenv==1.0.0
+bleach==6.1.0
+python-magic==0.4.27
+
+# AI and ML libraries (lightweight)
+requests==2.31.0
+numpy>=1.24.0
+transformers>=4.30.0
+sentence-transformers>=2.2.0
+openai>=1.0.0
+
+# Utilities
+Werkzeug==2.3.7
+click==8.1.7
+
+# Optional: For production deployment
+# gunicorn==21.2.0
+
+# Report generation
+reportlab==4.0.4
+
+# Optional: For enhanced features
+# Flask-Mail==0.9.1
+# Flask-Limiter==3.5.0

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('analytics.dashboard') }}">
+        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('analytics.students') }}">
+        <i class="bi bi-people me-1"></i>Students
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('analytics.placements') }}">
+        <i class="bi bi-graph-up me-1"></i>Placements
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('analytics.reports') }}">
+        <i class="bi bi-file-earmark-text me-1"></i>Reports
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('analytics.settings') }}">
+        <i class="bi bi-gear me-1"></i>Settings
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Admin Profile -->
+                    <div class="text-center mb-4">
+                        <div class="admin-avatar mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                            <i class="bi bi-shield-check text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h6 class="mb-1">{{ current_user.username if current_user else 'Placement Officer' }}</h6>
+                        <small class="text-muted">{{ current_user.email if current_user else 'admin@bput.ac.in' }}</small>
+                        <div class="mt-2">
+                            <span class="badge bg-primary">Placement Officer</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="row text-center mb-4">
+                        <div class="col-6 mb-3">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block total_students %}1,234{% endblock %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Total Students</div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block placed_students %}456{% endblock %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Placed</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block active_companies %}89{% endblock %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Companies</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number" style="font-size: 1.5rem;">{% block placement_rate %}37%{% endblock %}</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Placement Rate</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('analytics.generate_report') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Generate Report
+                        </a>
+                        <a href="{{ url_for('analytics.export_data') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-download me-1"></i>Export Data
+                        </a>
+                        <a href="{{ url_for('analytics.bulk_upload') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-upload me-1"></i>Bulk Upload
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Status -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-activity me-2"></i>System Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">AI Services</span>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                    </div>
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Database</span>
+                            <span class="badge bg-success">Healthy</span>
+                        </div>
+                    </div>
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Email Service</span>
+                            <span class="badge bg-warning">Limited</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Backup</span>
+                            <span class="badge bg-success">Updated</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Alerts -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-bell me-2"></i>Recent Alerts</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert-item mb-3">
+                        <div class="d-flex">
+                            <div class="alert-icon me-3">
+                                <i class="bi bi-info-circle text-info"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">New company registration pending approval</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">30 minutes ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-item mb-3">
+                        <div class="d-flex">
+                            <div class="alert-icon me-3">
+                                <i class="bi bi-exclamation-triangle text-warning"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">High volume of job applications detected</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="d-flex">
+                            <div class="alert-icon me-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted">Weekly backup completed successfully</small>
+                                <div class="text-muted" style="font-size: 0.75rem;">1 day ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            {% block admin_content %}
+            <!-- Admin-specific content goes here -->
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-item, .alert-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-item:last-child, .alert-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.alert-icon {
+    width: 24px;
+    text-align: center;
+}
+
+.admin-avatar {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+</style>
+{% endblock %}

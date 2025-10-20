@@ -1,0 +1,143 @@
+{
+  "app_title": "AI କ୍ୟାରିଅର ପ୍ଲାଟଫର୍ମ",
+  "app_subtitle": "AI ଚାଳିତ କ୍ୟାରିଅର ମାର୍ଗଦର୍ଶନ ଏବଂ ସୁଯୋଗ ସହିତ BPUT ଛାତ୍ରମାନଙ୍କୁ ସଶକ୍ତ କରିବା",
+  
+  "navigation": {
+    "home": "ଘର",
+    "dashboard": "ଡ୍ୟାସବୋର୍ଡ",
+    "profile": "ପ୍ରୋଫାଇଲ",
+    "jobs": "ଚାକିରି",
+    "analytics": "ବିଶ୍ଳେଷଣ",
+    "settings": "ସେଟିଂସ",
+    "logout": "ଲଗଆଉଟ",
+    "login": "ଲଗଇନ",
+    "register": "ପଞ୍ଜୀକରଣ"
+  },
+  
+  "auth": {
+    "login_title": "ଆପଣଙ୍କ ଆକାଉଣ୍ଟରେ ଲଗଇନ କରନ୍ତୁ",
+    "register_title": "ନୂତନ ଆକାଉଣ୍ଟ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "username": "ଉପଯୋଗକର୍ତ୍ତା ନାମ",
+    "email": "ଇମେଲ ଠିକଣା",
+    "password": "ପାସୱାର୍ଡ",
+    "confirm_password": "ପାସୱାର୍ଡ ନିଶ୍ଚିତ କରନ୍ତୁ",
+    "role": "ଭୂମିକା",
+    "student": "ଛାତ୍ର",
+    "employer": "ନିଯୁକ୍ତିଦାତା",
+    "placement_officer": "ପ୍ଲେସମେଣ୍ଟ ଅଧିକାରୀ",
+    "login_button": "ଲଗଇନ",
+    "register_button": "ପଞ୍ଜୀକରଣ",
+    "forgot_password": "ପାସୱାର୍ଡ ଭୁଲିଗଲେ?",
+    "already_have_account": "ପୂର୍ବରୁ ଆକାଉଣ୍ଟ ଅଛି?",
+    "dont_have_account": "ଆକାଉଣ୍ଟ ନାହିଁ?",
+    "login_success": "ଲଗଇନ ସଫଳ!",
+    "registration_success": "ପଞ୍ଜୀକରଣ ସଫଳ! ଦୟାକରି ଲଗଇନ କରନ୍ତୁ।",
+    "invalid_credentials": "ଅବୈଧ ଉପଯୋଗକର୍ତ୍ତା ନାମ କିମ୍ବା ପାସୱାର୍ଡ",
+    "user_exists": "ଉପଯୋଗକର୍ତ୍ତା ପୂର୍ବରୁ ଅଛନ୍ତି"
+  },
+  
+  "student": {
+    "dashboard_title": "ଛାତ୍ର ଡ୍ୟାସବୋର୍ଡ",
+    "profile_title": "ଛାତ୍ର ପ୍ରୋଫାଇଲ",
+    "edit_profile": "ପ୍ରୋଫାଇଲ ସମ୍ପାଦନା",
+    "personal_info": "ବ୍ୟକ୍ତିଗତ ସୂଚନା",
+    "academic_info": "ଶିକ୍ଷାଗତ ସୂଚନା",
+    "skills": "ଦକ୍ଷତା",
+    "technical_skills": "ବୈଷୟିକ ଦକ୍ଷତା",
+    "soft_skills": "ନରମ ଦକ୍ଷତା",
+    "projects": "ପ୍ରକଳ୍ପ",
+    "achievements": "ସଫଳତା",
+    "career_recommendations": "କ୍ୟାରିଅର ସୁପାରିଶ",
+    "job_matches": "ଚାକିରି ମେଳ",
+    "applications": "ମୋର ଆବେଦନ",
+    "full_name": "ପୂର୍ଣ୍ଣ ନାମ",
+    "phone": "ଫୋନ ନମ୍ବର",
+    "address": "ଠିକଣା",
+    "cgpa": "CGPA",
+    "branch": "ଶାଖା",
+    "semester": "ସେମିଷ୍ଟର",
+    "graduation_year": "ସ୍ନାତକ ବର୍ଷ",
+    "add_skill": "ଦକ୍ଷତା ଯୋଗ କରନ୍ତୁ",
+    "save_profile": "ପ୍ରୋଫାଇଲ ସେଭ କରନ୍ତୁ",
+    "profile_updated": "ପ୍ରୋଫାଇଲ ସଫଳତାର ସହିତ ଅପଡେଟ ହୋଇଛି!"
+  },
+  
+  "employer": {
+    "dashboard_title": "ନିଯୁକ୍ତିଦାତା ଡ୍ୟାସବୋର୍ଡ",
+    "post_job": "ନୂତନ ଚାକିରି ପୋଷ୍ଟ କରନ୍ତୁ",
+    "job_title": "ଚାକିରି ଶୀର୍ଷକ",
+    "job_description": "ଚାକିରି ବର୍ଣ୍ଣନା",
+    "requirements": "ଆବଶ୍ୟକତା",
+    "location": "ସ୍ଥାନ",
+    "salary_range": "ବେତନ ପରିସର",
+    "application_deadline": "ଆବେଦନ ଶେଷ ତାରିଖ",
+    "candidates": "ପ୍ରାର୍ଥୀ",
+    "applications": "ଆବେଦନ",
+    "shortlisted": "ସଂକ୍ଷିପ୍ତ ତାଲିକାଭୁକ୍ତ",
+    "company_name": "କମ୍ପାନୀ ନାମ",
+    "company_description": "କମ୍ପାନୀ ବର୍ଣ୍ଣନା",
+    "post_job_button": "ଚାକିରି ପୋଷ୍ଟ କରନ୍ତୁ",
+    "job_posted": "ଚାକିରି ସଫଳତାର ସହିତ ପୋଷ୍ଟ ହୋଇଛି!",
+    "view_candidates": "ପ୍ରାର୍ଥୀ ଦେଖନ୍ତୁ"
+  },
+  
+  "analytics": {
+    "dashboard_title": "ବିଶ୍ଳେଷଣ ଡ୍ୟାସବୋର୍ଡ",
+    "skill_gaps": "ଦକ୍ଷତା ଫାଙ୍କ ବିଶ୍ଳେଷଣ",
+    "placement_trends": "ପ୍ଲେସମେଣ୍ଟ ଧାରା",
+    "industry_demand": "ଶିଳ୍ପ ଚାହିଦା",
+    "reports": "ରିପୋର୍ଟ",
+    "generate_report": "ରିପୋର୍ଟ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "export_data": "ତଥ୍ୟ ରପ୍ତାନି କରନ୍ତୁ",
+    "total_students": "ମୋଟ ଛାତ୍ର",
+    "total_placements": "ମୋଟ ପ୍ଲେସମେଣ୍ଟ",
+    "placement_rate": "ପ୍ଲେସମେଣ୍ଟ ହାର",
+    "average_salary": "ହାରାହାରି ବେତନ"
+  },
+  
+  "common": {
+    "save": "ସେଭ କରନ୍ତୁ",
+    "cancel": "ବାତିଲ",
+    "edit": "ସମ୍ପାଦନା",
+    "delete": "ଡିଲିଟ",
+    "view": "ଦେଖନ୍ତୁ",
+    "search": "ଖୋଜନ୍ତୁ",
+    "filter": "ଫିଲ୍ଟର",
+    "sort": "ସର୍ଟ",
+    "loading": "ଲୋଡ ହେଉଛି...",
+    "no_data": "କୌଣସି ତଥ୍ୟ ଉପଲବ୍ଧ ନାହିଁ",
+    "error": "ଏକ ତ୍ରୁଟି ଘଟିଛି",
+    "success": "ଅପରେସନ ସଫଳ",
+    "confirm": "ନିଶ୍ଚିତ କରନ୍ତୁ",
+    "yes": "ହଁ",
+    "no": "ନା",
+    "close": "ବନ୍ଦ କରନ୍ତୁ",
+    "submit": "ଦାଖଲ କରନ୍ତୁ",
+    "reset": "ରିସେଟ",
+    "back": "ପଛକୁ",
+    "next": "ପରବର୍ତ୍ତୀ",
+    "previous": "ପୂର୍ବବର୍ତ୍ତୀ",
+    "select_language": "ଭାଷା ବାଛନ୍ତୁ",
+    "language_changed": "ଭାଷା ସଫଳତାର ସହିତ ପରିବର୍ତ୍ତନ ହୋଇଛି",
+    "invalid_language": "ଅବୈଧ ଭାଷା ବାଛିଛନ୍ତି"
+  },
+  
+  "footer": {
+    "about": "ବିଷୟରେ",
+    "contact": "ଯୋଗାଯୋଗ",
+    "privacy_policy": "ଗୋପନୀୟତା ନୀତି",
+    "help_center": "ସହାୟତା କେନ୍ଦ୍ର",
+    "faq": "FAQ",
+    "feedback": "ମତାମତ",
+    "copyright": "ସମସ୍ତ ଅଧିକାର ସଂରକ୍ଷିତ"
+  },
+  
+  "validation": {
+    "required_field": "ଏହି କ୍ଷେତ୍ର ଆବଶ୍ୟକ",
+    "invalid_email": "ଦୟାକରି ଏକ ବୈଧ ଇମେଲ ଠିକଣା ପ୍ରବେଶ କରନ୍ତୁ",
+    "invalid_phone": "ଦୟାକରି ଏକ ବୈଧ ଫୋନ ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ",
+    "password_min_length": "ପାସୱାର୍ଡ ଅତି କମରେ 8 ଅକ୍ଷର ହେବା ଆବଶ୍ୟକ",
+    "passwords_dont_match": "ପାସୱାର୍ଡ ମେଳ ଖାଉନାହିଁ",
+    "invalid_format": "ଅବୈଧ ଫର୍ମାଟ"
+  }
+}

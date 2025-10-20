@@ -1,0 +1,143 @@
+{
+  "app_title": "AI Career Platform",
+  "app_subtitle": "Empowering BPUT students with AI-driven career guidance and opportunities",
+  
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "jobs": "Jobs",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  
+  "auth": {
+    "login_title": "Login to Your Account",
+    "register_title": "Create New Account",
+    "username": "Username",
+    "email": "Email Address",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "role": "Role",
+    "student": "Student",
+    "employer": "Employer",
+    "placement_officer": "Placement Officer",
+    "login_button": "Login",
+    "register_button": "Register",
+    "forgot_password": "Forgot Password?",
+    "already_have_account": "Already have an account?",
+    "dont_have_account": "Don't have an account?",
+    "login_success": "Login successful!",
+    "registration_success": "Registration successful! Please login.",
+    "invalid_credentials": "Invalid username or password",
+    "user_exists": "User already exists"
+  },
+  
+  "student": {
+    "dashboard_title": "Student Dashboard",
+    "profile_title": "Student Profile",
+    "edit_profile": "Edit Profile",
+    "personal_info": "Personal Information",
+    "academic_info": "Academic Information",
+    "skills": "Skills",
+    "technical_skills": "Technical Skills",
+    "soft_skills": "Soft Skills",
+    "projects": "Projects",
+    "achievements": "Achievements",
+    "career_recommendations": "Career Recommendations",
+    "job_matches": "Job Matches",
+    "applications": "My Applications",
+    "full_name": "Full Name",
+    "phone": "Phone Number",
+    "address": "Address",
+    "cgpa": "CGPA",
+    "branch": "Branch",
+    "semester": "Semester",
+    "graduation_year": "Graduation Year",
+    "add_skill": "Add Skill",
+    "save_profile": "Save Profile",
+    "profile_updated": "Profile updated successfully!"
+  },
+  
+  "employer": {
+    "dashboard_title": "Employer Dashboard",
+    "post_job": "Post New Job",
+    "job_title": "Job Title",
+    "job_description": "Job Description",
+    "requirements": "Requirements",
+    "location": "Location",
+    "salary_range": "Salary Range",
+    "application_deadline": "Application Deadline",
+    "candidates": "Candidates",
+    "applications": "Applications",
+    "shortlisted": "Shortlisted",
+    "company_name": "Company Name",
+    "company_description": "Company Description",
+    "post_job_button": "Post Job",
+    "job_posted": "Job posted successfully!",
+    "view_candidates": "View Candidates"
+  },
+  
+  "analytics": {
+    "dashboard_title": "Analytics Dashboard",
+    "skill_gaps": "Skill Gap Analysis",
+    "placement_trends": "Placement Trends",
+    "industry_demand": "Industry Demand",
+    "reports": "Reports",
+    "generate_report": "Generate Report",
+    "export_data": "Export Data",
+    "total_students": "Total Students",
+    "total_placements": "Total Placements",
+    "placement_rate": "Placement Rate",
+    "average_salary": "Average Salary"
+  },
+  
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "loading": "Loading...",
+    "no_data": "No data available",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "submit": "Submit",
+    "reset": "Reset",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "select_language": "Select Language",
+    "language_changed": "Language changed successfully",
+    "invalid_language": "Invalid language selected"
+  },
+  
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy_policy": "Privacy Policy",
+    "help_center": "Help Center",
+    "faq": "FAQ",
+    "feedback": "Feedback",
+    "copyright": "All rights reserved"
+  },
+  
+  "validation": {
+    "required_field": "This field is required",
+    "invalid_email": "Please enter a valid email address",
+    "invalid_phone": "Please enter a valid phone number",
+    "password_min_length": "Password must be at least 8 characters long",
+    "passwords_dont_match": "Passwords do not match",
+    "invalid_format": "Invalid format"
+  }
+}

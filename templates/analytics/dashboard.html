@@ -1,0 +1,829 @@
+{% extends "layouts/admin_layout.html" %}
+
+{% block title %}Analytics Dashboard - AI Career Platform{% endblock %}
+
+{% block admin_content %}
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Analytics Dashboard</h2>
+        <p class="text-muted mb-0">Comprehensive placement and career analytics for BPUT</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-calendar me-1"></i>Date Range
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="setDateRange('current_year')">Current Year</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setDateRange('last_year')">Last Year</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setDateRange('last_6_months')">Last 6 Months</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setDateRange('custom')">Custom Range</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-outline-secondary" onclick="exportDashboard()">
+            <i class="bi bi-download me-1"></i>Export
+        </button>
+        <button class="btn btn-primary" onclick="refreshDashboard()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="total-placements">0</div>
+                    <div class="stat-label">Total Placements</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-briefcase text-success" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+            <div class="stat-change mt-2">
+                <span class="text-success" id="placements-change">+12% from last period</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="avg-salary">₹0</div>
+                    <div class="stat-label">Average Salary</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-currency-rupee text-primary" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+            <div class="stat-change mt-2">
+                <span class="text-success" id="salary-change">+8% from last period</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="placement-rate">0%</div>
+                    <div class="stat-label">Placement Rate</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-graph-up text-info" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+            <div class="stat-change mt-2">
+                <span class="text-success" id="rate-change">+5% from last period</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="top-companies">0</div>
+                    <div class="stat-label">Partner Companies</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-building text-warning" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+            <div class="stat-change mt-2">
+                <span class="text-success" id="companies-change">+3 new this month</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Placement Trends Chart -->
+    <div class="col-lg-8">
+        <div class="analytics-widget">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="widget-title">Placement Trends</h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="trend-period" id="trend-monthly" checked>
+                    <label class="btn btn-outline-primary" for="trend-monthly">Monthly</label>
+                    
+                    <input type="radio" class="btn-check" name="trend-period" id="trend-quarterly">
+                    <label class="btn btn-outline-primary" for="trend-quarterly">Quarterly</label>
+                    
+                    <input type="radio" class="btn-check" name="trend-period" id="trend-yearly">
+                    <label class="btn btn-outline-primary" for="trend-yearly">Yearly</label>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="placement-trends-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Branch Performance -->
+    <div class="col-lg-4">
+        <div class="analytics-widget">
+            <h5 class="widget-title">Branch Performance</h5>
+            <div class="chart-container">
+                <canvas id="branch-performance-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Industry & Skills Row -->
+<div class="row g-4 mb-4">
+    <!-- Industry Distribution -->
+    <div class="col-lg-6">
+        <div class="analytics-widget">
+            <h5 class="widget-title">Industry Distribution</h5>
+            <div class="chart-container">
+                <canvas id="industry-distribution-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Skills in Demand -->
+    <div class="col-lg-6">
+        <div class="analytics-widget">
+            <h5 class="widget-title">Top Skills in Demand</h5>
+            <div id="skills-demand-container">
+                <!-- Skills will be loaded here -->
+                <div class="text-center py-4">
+                    <div class="loading-spinner mb-2"></div>
+                    <p class="text-muted">Loading skills data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Analytics Row -->
+<div class="row g-4">
+    <!-- Skill Gap Analysis -->
+    <div class="col-lg-8">
+        <div class="analytics-widget">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="widget-title">Skill Gap Analysis</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-filter me-1"></i>Filter by Branch
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('')">All Branches</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('Computer Science Engineering')">CSE</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('Information Technology')">IT</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('Electronics & Communication')">ECE</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('Electrical Engineering')">EE</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterSkillGaps('Mechanical Engineering')">ME</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="skill-gaps-container">
+                <!-- Skill gaps will be loaded here -->
+                <div class="text-center py-4">
+                    <div class="loading-spinner mb-2"></div>
+                    <p class="text-muted">Loading skill gap analysis...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity & Alerts -->
+    <div class="col-lg-4">
+        <!-- Top Companies -->
+        <div class="analytics-widget mb-4">
+            <h6 class="widget-title">Top Recruiting Companies</h6>
+            <div id="top-companies-container">
+                <!-- Top companies will be loaded here -->
+                <div class="company-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="company-logo me-3">
+                                <i class="bi bi-building text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">TCS</div>
+                                <small class="text-muted">Technology</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">45</div>
+                            <small class="text-muted">hires</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="company-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="company-logo me-3">
+                                <i class="bi bi-building text-success"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Infosys</div>
+                                <small class="text-muted">Technology</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">38</div>
+                            <small class="text-muted">hires</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="analytics-widget">
+            <h6 class="widget-title">Quick Actions</h6>
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('analytics.reports') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-file-earmark-text me-2"></i>Generate Report
+                </a>
+                <button class="btn btn-outline-primary btn-sm" onclick="exportData()">
+                    <i class="bi bi-download me-2"></i>Export Data
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="scheduleReport()">
+                    <i class="bi bi-calendar-event me-2"></i>Schedule Report
+                </button>
+                <a href="{{ url_for('analytics.settings') }}" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-gear me-2"></i>Analytics Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Date Range Modal -->
+<div class="modal fade" id="dateRangeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Date Range</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start-date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start-date">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end-date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end-date">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyDateRange()">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-change {
+    font-size: 0.875rem;
+}
+
+.company-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.company-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.company-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.skill-gap-item {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.skill-gap-severity {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.severity-high {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.severity-medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.severity-low {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.skill-demand-item {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.skill-demand-item:hover {
+    border-color: var(--primary-blue);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.demand-score {
+    width: 60px;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.demand-score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+    transition: width 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Analytics Dashboard JavaScript
+let currentDateRange = 'current_year';
+let charts = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadDashboardData();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Trend period radio buttons
+    document.querySelectorAll('input[name="trend-period"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                loadPlacementTrends(this.id.replace('trend-', ''));
+            }
+        });
+    });
+}
+
+async function loadDashboardData() {
+    try {
+        // Load main dashboard metrics
+        await loadDashboardMetrics();
+        
+        // Load placement trends
+        await loadPlacementTrends('monthly');
+        
+        // Load branch performance
+        await loadBranchPerformance();
+        
+        // Load industry distribution
+        await loadIndustryDistribution();
+        
+        // Load skills demand
+        await loadSkillsDemand();
+        
+        // Load skill gaps
+        await loadSkillGaps();
+        
+        // Load top companies
+        await loadTopCompanies();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        CP.utils.showToast('Failed to load dashboard data', 'error');
+    }
+}
+
+async function loadDashboardMetrics() {
+    try {
+        const response = await CP.api.get('/analytics/dashboard');
+        
+        if (response.success) {
+            const data = response.data;
+            
+            // Update key metrics
+            document.getElementById('total-placements').textContent = data.total_placements || 0;
+            
+            if (data.salary_stats && data.salary_stats.avg_salary) {
+                document.getElementById('avg-salary').textContent = 
+                    '₹' + Math.round(data.salary_stats.avg_salary).toLocaleString();
+            }
+            
+            // Calculate placement rate (would need total students in real implementation)
+            const placementRate = Math.round((data.total_placements / 1000) * 100); // Mock calculation
+            document.getElementById('placement-rate').textContent = placementRate + '%';
+            
+            // Count unique companies
+            const uniqueCompanies = data.top_companies ? data.top_companies.length : 0;
+            document.getElementById('top-companies').textContent = uniqueCompanies;
+        }
+    } catch (error) {
+        console.error('Error loading dashboard metrics:', error);
+    }
+}
+
+async function loadPlacementTrends(period = 'monthly') {
+    try {
+        const groupBy = period === 'monthly' ? 'month' : period === 'quarterly' ? 'quarter' : 'year';
+        const response = await CP.api.get(`/analytics/placement-trends?group_by=${groupBy}`);
+        
+        if (response.success && response.data.trends) {
+            updatePlacementTrendsChart(response.data.trends);
+        }
+    } catch (error) {
+        console.error('Error loading placement trends:', error);
+    }
+}
+
+async function loadBranchPerformance() {
+    try {
+        const response = await CP.api.get('/analytics/dashboard');
+        
+        if (response.success && response.data.branch_trends) {
+            updateBranchPerformanceChart(response.data.branch_trends);
+        }
+    } catch (error) {
+        console.error('Error loading branch performance:', error);
+    }
+}
+
+async function loadIndustryDistribution() {
+    try {
+        const response = await CP.api.get('/analytics/dashboard');
+        
+        if (response.success && response.data.industry_stats) {
+            updateIndustryDistributionChart(response.data.industry_stats);
+        }
+    } catch (error) {
+        console.error('Error loading industry distribution:', error);
+    }
+}
+
+async function loadSkillsDemand() {
+    try {
+        const response = await CP.api.get('/analytics/industry-demand?limit=10');
+        
+        if (response.success && response.data.top_skills) {
+            renderSkillsDemand(response.data.top_skills);
+        }
+    } catch (error) {
+        console.error('Error loading skills demand:', error);
+        document.getElementById('skills-demand-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">Failed to load skills data</p>
+            </div>
+        `;
+    }
+}
+
+async function loadSkillGaps(branch = '') {
+    try {
+        const params = branch ? `?branch=${encodeURIComponent(branch)}` : '';
+        const response = await CP.api.get(`/analytics/skill-gaps${params}`);
+        
+        if (response.success && response.data.branch_analysis) {
+            renderSkillGaps(response.data.branch_analysis);
+        }
+    } catch (error) {
+        console.error('Error loading skill gaps:', error);
+        document.getElementById('skill-gaps-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">Failed to load skill gap analysis</p>
+            </div>
+        `;
+    }
+}
+
+async function loadTopCompanies() {
+    try {
+        const response = await CP.api.get('/analytics/dashboard');
+        
+        if (response.success && response.data.top_companies) {
+            renderTopCompanies(response.data.top_companies);
+        }
+    } catch (error) {
+        console.error('Error loading top companies:', error);
+    }
+}
+
+function initializeCharts() {
+    // Initialize Chart.js charts
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    };
+    
+    // Placement Trends Chart
+    const trendsCtx = document.getElementById('placement-trends-chart').getContext('2d');
+    charts.placementTrends = new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Placements',
+                data: [],
+                borderColor: 'rgb(37, 99, 235)',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Branch Performance Chart
+    const branchCtx = document.getElementById('branch-performance-chart').getContext('2d');
+    charts.branchPerformance = new Chart(branchCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
+                ]
+            }]
+        },
+        options: chartOptions
+    });
+    
+    // Industry Distribution Chart
+    const industryCtx = document.getElementById('industry-distribution-chart').getContext('2d');
+    charts.industryDistribution = new Chart(industryCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Placements',
+                data: [],
+                backgroundColor: 'rgba(37, 99, 235, 0.8)'
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updatePlacementTrendsChart(trends) {
+    const labels = trends.map(t => t.period);
+    const data = trends.map(t => t.placement_count);
+    
+    charts.placementTrends.data.labels = labels;
+    charts.placementTrends.data.datasets[0].data = data;
+    charts.placementTrends.update();
+}
+
+function updateBranchPerformanceChart(branchTrends) {
+    const labels = branchTrends.map(b => b.student_branch || 'Unknown');
+    const data = branchTrends.map(b => b.placement_count);
+    
+    charts.branchPerformance.data.labels = labels;
+    charts.branchPerformance.data.datasets[0].data = data;
+    charts.branchPerformance.update();
+}
+
+function updateIndustryDistributionChart(industryStats) {
+    const labels = industryStats.map(i => i.job_category || 'Unknown');
+    const data = industryStats.map(i => i.placement_count);
+    
+    charts.industryDistribution.data.labels = labels;
+    charts.industryDistribution.data.datasets[0].data = data;
+    charts.industryDistribution.update();
+}
+
+function renderSkillsDemand(skills) {
+    const container = document.getElementById('skills-demand-container');
+    
+    if (skills.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-graph-up text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No skills demand data available</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = skills.slice(0, 8).map(skill => 
+        `<div class="skill-demand-item">
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-bold">${skill.skill_name}</span>
+                    <span class="text-muted">${skill.demand_score || 0}%</span>
+                </div>
+                <div class="demand-score">
+                    <div class="demand-score-fill" style="width: ${skill.demand_score || 0}%"></div>
+                </div>
+                <small class="text-muted">${skill.job_count || 0} jobs • ${skill.industry || 'Various'}</small>
+            </div>
+        </div>`
+    ).join('');
+}
+
+function renderSkillGaps(branchAnalysis) {
+    const container = document.getElementById('skill-gaps-container');
+    
+    if (Object.keys(branchAnalysis).length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No skill gap data available</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    Object.values(branchAnalysis).forEach(branch => {
+        if (branch.skill_gaps && branch.skill_gaps.length > 0) {
+            html += `
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">${branch.branch || branch.student_branch} 
+                        <span class="text-muted">(${branch.student_count} students)</span>
+                    </h6>
+                    <div class="row">
+            `;
+            
+            branch.skill_gaps.slice(0, 6).forEach(gap => {
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="skill-gap-item">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold">${gap.skill}</span>
+                                <span class="skill-gap-severity severity-${gap.gap_severity}">
+                                    ${gap.gap_severity.toUpperCase()}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted">
+                                <small>Demand: ${gap.demand_score}%</small>
+                                <small>Coverage: ${gap.coverage_percentage}%</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+        }
+    });
+    
+    if (html === '') {
+        html = `
+            <div class="text-center py-4">
+                <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">No significant skill gaps identified</p>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function renderTopCompanies(companies) {
+    const container = document.getElementById('top-companies-container');
+    
+    if (companies.length === 0) return;
+    
+    container.innerHTML = companies.slice(0, 5).map(company => 
+        `<div class="company-item mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="company-logo me-3">
+                        <i class="bi bi-building text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">${company.company_name}</div>
+                        <small class="text-muted">${company.job_category || 'Various'}</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="fw-bold">${company.placement_count}</div>
+                    <small class="text-muted">hires</small>
+                </div>
+            </div>
+        </div>`
+    ).join('');
+}
+
+function setDateRange(range) {
+    if (range === 'custom') {
+        const modal = new bootstrap.Modal(document.getElementById('dateRangeModal'));
+        modal.show();
+        return;
+    }
+    
+    currentDateRange = range;
+    loadDashboardData();
+    CP.utils.showToast(`Date range updated to ${range.replace('_', ' ')}`, 'success');
+}
+
+function applyDateRange() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        CP.utils.showToast('Please select both start and end dates', 'warning');
+        return;
+    }
+    
+    currentDateRange = 'custom';
+    // Store custom dates for API calls
+    window.customDateRange = { start: startDate, end: endDate };
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('dateRangeModal'));
+    modal.hide();
+    
+    loadDashboardData();
+    CP.utils.showToast('Custom date range applied', 'success');
+}
+
+function filterSkillGaps(branch) {
+    loadSkillGaps(branch);
+    const branchName = branch || 'All Branches';
+    CP.utils.showToast(`Filtered by ${branchName}`, 'info');
+}
+
+function refreshDashboard() {
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    CP.utils.showLoading(button);
+    
+    loadDashboardData().finally(() => {
+        CP.utils.hideLoading(button, originalText);
+        CP.utils.showToast('Dashboard refreshed', 'success');
+    });
+}
+
+function exportDashboard() {
+    CP.utils.showToast('Dashboard export feature coming soon!', 'info');
+}
+
+function exportData() {
+    CP.utils.showToast('Data export feature coming soon!', 'info');
+}
+
+function scheduleReport() {
+    CP.utils.showToast('Report scheduling feature coming soon!', 'info');
+}
+</script>
+{% endblock %}

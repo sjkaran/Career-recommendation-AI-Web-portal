@@ -1,0 +1,534 @@
+{% extends "layouts/employer_layout.html" %}
+
+{% block title %}Employer Dashboard - AI Career Platform{% endblock %}
+
+{% block employer_content %}
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Welcome back!</h2>
+        <p class="text-muted mb-0">Manage your job postings and find the best candidates</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+        <a href="{{ url_for('employer.post_job') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Post New Job
+        </a>
+    </div>
+</div>
+
+<!-- Key Metrics Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="active-jobs">5</div>
+                    <div class="stat-label">Active Jobs</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-briefcase text-primary" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="total-applications">23</div>
+                    <div class="stat-label">Applications</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-file-text text-success" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="shortlisted-candidates">8</div>
+                    <div class="stat-label">Shortlisted</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-star text-warning" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-number" id="hired-candidates">3</div>
+                    <div class="stat-label">Hired</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-person-check text-info" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Row -->
+<div class="row g-4">
+    <!-- Recent Job Postings -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Recent Job Postings</h5>
+                <a href="{{ url_for('employer.jobs') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div id="recent-jobs-container">
+                    <!-- Recent jobs will be loaded here -->
+                    <div class="text-center py-4">
+                        <div class="loading-spinner mb-2"></div>
+                        <p class="text-muted">Loading job postings...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Applications -->
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Recent Applications</h5>
+                <a href="{{ url_for('employer.applications') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div id="recent-applications-container">
+                    <!-- Recent applications will be loaded here -->
+                    <div class="text-center py-4">
+                        <div class="loading-spinner mb-2"></div>
+                        <p class="text-muted">Loading applications...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Content -->
+    <div class="col-lg-4">
+        <!-- Top Candidates -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-star me-2"></i>Top Matched Candidates</h6>
+            </div>
+            <div class="card-body">
+                <div id="top-candidates-container">
+                    <!-- Top candidates will be loaded here -->
+                    <div class="candidate-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="candidate-avatar me-3">
+                                <i class="bi bi-person-fill text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">John Doe</div>
+                                <small class="text-muted">Computer Science • 95% Match</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-success">Available</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="candidate-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="candidate-avatar me-3">
+                                <i class="bi bi-person-fill text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">Jane Smith</div>
+                                <small class="text-muted">Information Technology • 92% Match</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-warning">Interviewing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('employer.candidates') }}" class="btn btn-sm btn-outline-primary">
+                        Browse All Candidates
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Application Status -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Application Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="status-breakdown">
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator bg-primary me-2"></div>
+                                <span>New Applications</span>
+                            </div>
+                            <span class="fw-bold" id="new-applications">12</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator bg-warning me-2"></div>
+                                <span>Under Review</span>
+                            </div>
+                            <span class="fw-bold" id="under-review">8</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator bg-info me-2"></div>
+                                <span>Shortlisted</span>
+                            </div>
+                            <span class="fw-bold" id="shortlisted">5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator bg-success me-2"></div>
+                                <span>Hired</span>
+                            </div>
+                            <span class="fw-bold" id="hired">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('employer.post_job') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Post New Job
+                    </a>
+                    <a href="{{ url_for('employer.browse_candidates') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-search me-2"></i>Browse Candidates
+                    </a>
+                    <a href="{{ url_for('employer.bulk_invite') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-envelope me-2"></i>Bulk Invite
+                    </a>
+                    <a href="{{ url_for('employer.analytics') }}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-graph-up me-2"></i>View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.candidate-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.candidate-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.candidate-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.status-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.job-posting-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.job-posting-card:hover {
+    border-color: var(--primary-blue);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.application-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.application-card:hover {
+    border-color: var(--success-green);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.stat-icon {
+    opacity: 0.7;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Employer Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+async function loadDashboardData() {
+    try {
+        // Load dashboard metrics
+        await loadMetrics();
+        
+        // Load recent job postings
+        await loadRecentJobs();
+        
+        // Load recent applications
+        await loadRecentApplications();
+        
+        // Load top candidates
+        await loadTopCandidates();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        CP.utils.showToast('Failed to load dashboard data', 'error');
+    }
+}
+
+async function loadMetrics() {
+    try {
+        // Load job statistics
+        const jobsResponse = await CP.api.get('/employer/jobs?per_page=100');
+        if (jobsResponse.jobs) {
+            const activeJobs = jobsResponse.jobs.filter(job => job.status === 'active').length;
+            document.getElementById('active-jobs').textContent = activeJobs;
+        }
+        
+        // Load application statistics
+        const appsResponse = await CP.api.get('/employer/applications?per_page=100');
+        if (appsResponse.applications) {
+            const applications = appsResponse.applications;
+            document.getElementById('total-applications').textContent = applications.length;
+            
+            const newApps = applications.filter(app => app.status === 'pending').length;
+            const underReview = applications.filter(app => app.status === 'reviewing').length;
+            const shortlisted = applications.filter(app => app.status === 'shortlisted').length;
+            const hired = applications.filter(app => app.status === 'hired').length;
+            
+            document.getElementById('new-applications').textContent = newApps;
+            document.getElementById('under-review').textContent = underReview;
+            document.getElementById('shortlisted').textContent = shortlisted;
+            document.getElementById('hired').textContent = hired;
+            
+            document.getElementById('shortlisted-candidates').textContent = shortlisted;
+            document.getElementById('hired-candidates').textContent = hired;
+        }
+        
+    } catch (error) {
+        console.error('Error loading metrics:', error);
+    }
+}
+
+async function loadRecentJobs() {
+    try {
+        const response = await CP.api.get('/employer/jobs?per_page=5');
+        const container = document.getElementById('recent-jobs-container');
+        
+        if (response.jobs && response.jobs.length > 0) {
+            container.innerHTML = response.jobs.map(job => 
+                `<div class="job-posting-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-1">${job.title}</h6>
+                            <p class="text-muted mb-0">${job.location || 'Remote'}</p>
+                        </div>
+                        <span class="badge ${getStatusBadgeClass(job.status)}">${job.status}</span>
+                    </div>
+                    <p class="text-muted mb-2">${job.description.substring(0, 100)}...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar me-1"></i>Posted ${CP.utils.formatDate(job.created_at)}
+                        </small>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/employer/jobs/${job.id}" class="btn btn-outline-primary">View</a>
+                            <a href="/employer/jobs/${job.id}/edit" class="btn btn-outline-secondary">Edit</a>
+                        </div>
+                    </div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No job postings yet</p>
+                    <a href="/employer/jobs/new" class="btn btn-primary">Post Your First Job</a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading recent jobs:', error);
+        document.getElementById('recent-jobs-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">Failed to load job postings</p>
+            </div>
+        `;
+    }
+}
+
+async function loadRecentApplications() {
+    try {
+        const response = await CP.api.get('/employer/applications?per_page=5');
+        const container = document.getElementById('recent-applications-container');
+        
+        if (response.applications && response.applications.length > 0) {
+            container.innerHTML = response.applications.map(app => 
+                `<div class="application-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="candidate-avatar me-3">
+                                <i class="bi bi-person-fill text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">${app.candidate_name || 'Candidate'}</h6>
+                                <small class="text-muted">${app.job_title}</small>
+                            </div>
+                        </div>
+                        <span class="badge ${getApplicationStatusBadgeClass(app.status)}">${app.status}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Applied ${CP.utils.formatDate(app.created_at)}
+                        </small>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/employer/applications/${app.id}" class="btn btn-outline-primary">Review</a>
+                            <button class="btn btn-outline-success" onclick="shortlistCandidate(${app.id})">Shortlist</button>
+                        </div>
+                    </div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-file-text text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">No applications received yet</p>
+                    <p class="text-muted">Post jobs to start receiving applications</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading recent applications:', error);
+        document.getElementById('recent-applications-container').innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">Failed to load applications</p>
+            </div>
+        `;
+    }
+}
+
+async function loadTopCandidates() {
+    try {
+        const response = await CP.api.get('/employer/candidates?per_page=5');
+        
+        if (response.candidates && response.candidates.length > 0) {
+            // Update top candidates display with real data when available
+        }
+    } catch (error) {
+        console.error('Error loading top candidates:', error);
+    }
+}
+
+function getStatusBadgeClass(status) {
+    const statusClasses = {
+        'active': 'bg-success',
+        'draft': 'bg-secondary',
+        'closed': 'bg-danger',
+        'paused': 'bg-warning'
+    };
+    return statusClasses[status] || 'bg-secondary';
+}
+
+function getApplicationStatusBadgeClass(status) {
+    const statusClasses = {
+        'pending': 'bg-primary',
+        'reviewing': 'bg-warning',
+        'shortlisted': 'bg-info',
+        'hired': 'bg-success',
+        'rejected': 'bg-danger'
+    };
+    return statusClasses[status] || 'bg-secondary';
+}
+
+async function shortlistCandidate(applicationId) {
+    try {
+        const response = await CP.api.put(`/employer/applications/${applicationId}`, {
+            status: 'shortlisted'
+        });
+        
+        if (response.success) {
+            CP.utils.showToast('Candidate shortlisted successfully', 'success');
+            loadRecentApplications(); // Refresh the applications list
+        }
+    } catch (error) {
+        CP.utils.showToast('Failed to shortlist candidate', 'error');
+    }
+}
+
+function refreshDashboard() {
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    CP.utils.showLoading(button);
+    
+    loadDashboardData().finally(() => {
+        CP.utils.hideLoading(button, originalText);
+        CP.utils.showToast('Dashboard refreshed', 'success');
+    });
+}
+</script>
+{% endblock %}

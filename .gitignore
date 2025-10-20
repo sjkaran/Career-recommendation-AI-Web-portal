@@ -16,7 +16,6 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -29,23 +28,17 @@ ENV/
 env.bak/
 venv.bak/
 
+# Environment Variables
+.env
+
 # Database
 *.db
 *.sqlite
 *.sqlite3
-instance/
-*.db-journal
 
-# Environment Variables
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-
-# File Uploads
-uploads/*
-!uploads/.gitkeep
+# Uploads
+uploads/
+static/uploads/
 
 # IDE
 .vscode/
@@ -53,22 +46,6 @@ uploads/*
 *.swp
 *.swo
 *~
-.project
-.pydevproject
-.settings/
-
-# Logs
-*.log
-logs/
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Testing
-.coverage
-.pytest_cache/
-.tox/
-htmlcov/
-.hypothesis/
 
 # OS
 .DS_Store
@@ -78,30 +55,27 @@ htmlcov/
 .Trashes
 ehthumbs.db
 Thumbs.db
-Desktop.ini
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Documentation
-docs/_build/
+# Logs
+*.log
+logs/
 
 # Flask
 instance/
 .webassets-cache
 
-# Scrapy
-.scrapy
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+htmlcov/
 
-# PyBuilder
-target/
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# pyenv
+.python-version
 
 # Backup files
 *.bak
 *.backup
-*.old

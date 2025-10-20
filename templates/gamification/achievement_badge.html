@@ -1,0 +1,130 @@
+<!-- Achievement Badge Component -->
+<div class="achievement-badge" data-achievement-id="{{ achievement.id }}" 
+     style="border-color: {{ achievement.color }};">
+    <div class="achievement-icon" style="color: {{ achievement.color }};">
+        <i class="{{ achievement.icon }}"></i>
+    </div>
+    <div class="achievement-info">
+        <h6 class="achievement-name">{{ achievement.name }}</h6>
+        <p class="achievement-description">{{ achievement.description }}</p>
+        <div class="achievement-meta">
+            <span class="points-earned">+{{ achievement.points }} points</span>
+            <span class="earned-date">{{ achievement.earned_at.strftime('%b %d, %Y') }}</span>
+        </div>
+    </div>
+    {% if show_controls %}
+    <div class="achievement-controls">
+        <button class="btn btn-sm btn-outline-secondary toggle-display" 
+                data-achievement-id="{{ achievement.id }}"
+                title="{{ 'Hide from profile' if achievement.is_displayed else 'Show on profile' }}">
+            <i class="fas {{ 'fa-eye-slash' if achievement.is_displayed else 'fa-eye' }}"></i>
+        </button>
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle share-btn" 
+                    type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-share"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item share-link" href="#" 
+                       data-platform="linkedin" data-achievement-id="{{ achievement.id }}">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a></li>
+                <li><a class="dropdown-item share-link" href="#" 
+                       data-platform="twitter" data-achievement-id="{{ achievement.id }}">
+                    <i class="fab fa-twitter"></i> Twitter
+                </a></li>
+                <li><a class="dropdown-item share-link" href="#" 
+                       data-platform="facebook" data-achievement-id="{{ achievement.id }}">
+                    <i class="fab fa-facebook"></i> Facebook
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item share-link" href="#" 
+                       data-platform="email" data-achievement-id="{{ achievement.id }}">
+                    <i class="fas fa-envelope"></i> Email
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.achievement-badge {
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 10px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.achievement-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.achievement-icon {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.achievement-info {
+    text-align: center;
+}
+
+.achievement-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.achievement-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.achievement-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.points-earned {
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.earned-date {
+    color: #888;
+}
+
+.achievement-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.achievement-controls .btn {
+    padding: 4px 8px;
+}
+
+.share-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.share-link i {
+    width: 16px;
+}
+</style>

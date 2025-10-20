@@ -1,0 +1,321 @@
+<!-- Achievements Showcase for Student Profile -->
+<div class="achievements-showcase">
+    <div class="section-header">
+        <h4><i class="fas fa-trophy text-warning"></i> Achievements & Badges</h4>
+        {% if is_own_profile %}
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#achievementsModal">
+            <i class="fas fa-cog"></i> Manage
+        </button>
+        {% endif %}
+    </div>
+    
+    {% if achievements %}
+    <div class="achievements-grid">
+        {% for achievement in achievements %}
+        {% if achievement.is_displayed or is_own_profile %}
+        <div class="achievement-card {{ 'private' if not achievement.is_displayed else '' }}" 
+             data-achievement-id="{{ achievement.id }}">
+            <div class="achievement-icon" style="color: {{ achievement.color }};">
+                <i class="{{ achievement.icon }}"></i>
+                {% if not achievement.is_displayed and is_own_profile %}
+                <span class="private-indicator" title="Hidden from public view">
+                    <i class="fas fa-eye-slash"></i>
+                </span>
+                {% endif %}
+            </div>
+            <div class="achievement-details">
+                <h6>{{ achievement.name }}</h6>
+                <p>{{ achievement.description }}</p>
+                <div class="achievement-footer">
+                    <span class="points">+{{ achievement.points }}</span>
+                    <span class="date">{{ achievement.earned_at.strftime('%b %Y') }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-achievements">
+        <i class="fas fa-medal text-muted"></i>
+        <p class="text-muted">
+            {% if is_own_profile %}
+            Complete your profile and engage with the platform to earn achievements!
+            {% else %}
+            No achievements to display yet.
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+    
+    {% if total_points > 0 %}
+    <div class="achievements-summary">
+        <div class="summary-item">
+            <span class="label">Total Points:</span>
+            <span class="value">{{ total_points }}</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Level:</span>
+            <span class="value">{{ level }}</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Achievements:</span>
+            <span class="value">{{ achievements|length }}</span>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Achievements Management Modal (for profile owner) -->
+{% if is_own_profile %}
+<div class="modal fade" id="achievementsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Your Achievements</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Earned Achievements</h6>
+                        <div id="earnedAchievements">
+                            {% for achievement in achievements %}
+                            {% include 'gamification/achievement_badge.html' with context %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Available Achievements</h6>
+                        <div id="availableAchievements">
+                            {% for achievement in available_achievements %}
+                            <div class="available-achievement">
+                                <div class="achievement-icon" style="color: {{ achievement.color }};">
+                                    <i class="{{ achievement.icon }}"></i>
+                                </div>
+                                <div class="achievement-info">
+                                    <h6>{{ achievement.name }}</h6>
+                                    <p>{{ achievement.description }}</p>
+                                    <span class="points-reward">{{ achievement.points }} points</span>
+                                </div>
+                                <div class="progress-indicator">
+                                    {% if achievement_progress.get(achievement.achievement_key) %}
+                                    {% set progress = achievement_progress[achievement.achievement_key] %}
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ progress.percentage }}%"></div>
+                                    </div>
+                                    <small>{{ progress.current }}/{{ progress.target }}</small>
+                                    {% else %}
+                                    <small class="text-muted">Progress not available</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.achievements-showcase {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.achievement-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.achievement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.achievement-card.private {
+    opacity: 0.7;
+    border: 2px dashed #ccc;
+}
+
+.achievement-icon {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.private-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #6c757d;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.achievement-details h6 {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.achievement-details p {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.achievement-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.achievement-footer .points {
+    background: #28a745;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.achievement-footer .date {
+    color: #888;
+}
+
+.no-achievements {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-achievements i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.achievements-summary {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item .label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.summary-item .value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.available-achievement {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+}
+
+.available-achievement .achievement-icon {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.available-achievement .achievement-info {
+    flex: 1;
+}
+
+.available-achievement .achievement-info h6 {
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+}
+
+.available-achievement .achievement-info p {
+    margin: 0 0 5px 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.points-reward {
+    background: #17a2b8;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.progress-indicator {
+    min-width: 100px;
+}
+
+.progress {
+    height: 8px;
+    margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .achievements-summary {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .available-achievement {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
